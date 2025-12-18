@@ -1,0 +1,57 @@
+{
+    "name": "procorad/procostat",
+    "description": "Statistical analysis engine for interlaboratory comparisons with full traceability and reproducibility.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Laurent Meuwly",
+            "email": "laurent@lmeuwly.ch",
+            "homepage": "https://axonium.ch",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Procorad\\Procostat\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Procorad\\Procostat\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Procorad\\Procostat\\ProcostatServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": ">=8.2",
+        "illuminate/support": "^10.0|^11.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^9.15",
+        "pestphp/pest": "^3.8",
+        "pestphp/pest-plugin-laravel": "^3.2",
+        "phpstan/phpstan": "^2.1",
+        "larastan/larastan": "^3.8"
+    },
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "analyse": "vendor/bin/phpstan analyse",
+        "format": "vendor/bin/pint",
+        "lint": "vendor/bin/pint --test",
+        "lint-fix": "vendor/bin/pint"
+    }
+}
