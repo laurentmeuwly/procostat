@@ -13,7 +13,7 @@ final class DecideLaboratoryFitnessTest extends TestCase
     {
         $step = new DecideLaboratoryFitness(new ThresholdsResolver());
 
-        $evaluation = $step([
+        $context = $step([
             'laboratoryCode' => 'LAB-007',
             'zPrimeScore' => 1.8,
             'zScore' => 2.5,
@@ -21,6 +21,8 @@ final class DecideLaboratoryFitnessTest extends TestCase
             'biasPercent' => 5.0,
             'thresholdStandard' => 'iso13528',
         ]);
+
+        $evaluation = $context['labEvaluation'];
 
         $this->assertSame(FitnessStatus::CONFORME, $evaluation->fitnessStatus);
         $this->assertSame('z_prime', $evaluation->decisionBasis);
@@ -30,11 +32,13 @@ final class DecideLaboratoryFitnessTest extends TestCase
     {
         $step = new DecideLaboratoryFitness(new ThresholdsResolver());
 
-        $evaluation = $step([
+        $context = $step([
             'laboratoryCode' => 'LAB-008',
             'zScore' => 2.6,
             'thresholdStandard' => 'iso13528',
         ]);
+
+        $evaluation = $context['labEvaluation'];
 
         $this->assertSame(FitnessStatus::DISCUTABLE, $evaluation->fitnessStatus);
         $this->assertSame('z', $evaluation->decisionBasis);

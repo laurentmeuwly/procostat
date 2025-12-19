@@ -17,48 +17,70 @@ final class DecideLaboratoryFitness
     /**
      * @param array{
      *   laboratoryCode: string,
+     *   thresholdStandard: string,
+     *   zScore?: float,
+     *   zPrimeScore?: float,
+     *   zetaScore?: float,
+     *   biasPercent?: float
+     * } $context
+     *
+     * @return array{
+     *   laboratoryCode: string,
+     *   thresholdStandard: string,
      *   zScore?: float,
      *   zPrimeScore?: float,
      *   zetaScore?: float,
      *   biasPercent?: float,
-     *   thresholdStandard: string
-     * } $data
+     *   labEvaluation: LabEvaluation
+     * }
      */
-    public function __invoke(array $data): LabEvaluation
+    public function __invoke(array $context): array
     {
-        $decisionScore = null;
-        $decisionBasis = null;
-
-        if (isset($data['zPrimeScore'])) {
-            $decisionScore = $data['zPrimeScore'];
-            $decisionBasis = 'z_prime';
-        } elseif (isset($data['zScore'])) {
-            $decisionScore = $data['zScore'];
-            $decisionBasis = 'z';
-        }
-
-        if ($decisionScore === null) {
+        if (!isset($context['laboratoryCode'], $context['thresholdStandard'])) {
             throw new RuntimeException(
-                'No decision score available (zPrimeScore or zScore required).'
+                'DecideLaboratoryFitness requires laboratoryCode and thresholdStandard.'
             );
         }
 
+        [$decisionScore, $decisionBasis] = $this->resolveDecisionScore($context);
+
         $thresholds = $this->thresholdsResolver
-            ->resolve($data['thresholdStandard']);
+            ->resolve($context['thresholdStandard']);
 
         $fitnessStatus = FitnessDecision::decideFromScore(
             $decisionScore,
             $thresholds
         );
 
-        return new LabEvaluation(
-            laboratoryCode: $data['laboratoryCode'],
-            zScore: $data['zScore'] ?? null,
-            zPrimeScore: $data['zPrimeScore'] ?? null,
-            zetaScore: $data['zetaScore'] ?? null,
-            biasPercent: $data['biasPercent'] ?? null,
+        $context['labEvaluation'] = new LabEvaluation(
+            laboratoryCode: $context['laboratoryCode'],
+            zScore: $context['zScore'] ?? null,
+            zPrimeScore: $context['zPrimeScore'] ?? null,
+            zetaScore: $context['zetaScore'] ?? null,
+            biasPercent: $context['biasPercent'] ?? null,
             fitnessStatus: $fitnessStatus,
             decisionBasis: $decisionBasis
+        );
+
+        return $context;
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     * @return array{0: float, 1: string}
+     */
+    private function resolveDecisionScore(array $context): array
+    {
+        if (isset($context['zPrimeScore'])) {
+            return [$context['zPrimeScore'], 'z_prime'];
+        }
+
+        if (isset($context['zScore'])) {
+            return [$context['zScore'], 'z'];
+        }
+
+        throw new RuntimeException(
+            'No decision score available: zPrimeScore or zScore is required.'
         );
     }
 }
