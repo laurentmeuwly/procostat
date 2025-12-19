@@ -3,6 +3,8 @@
 namespace Procorad\Procostat\Application\Pipeline\Steps;
 
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
+use Procorad\Procostat\Domain\Audit\AuditBuilder;
+use Procorad\Procostat\Domain\Audit\AuditTrail;
 use Procorad\Procostat\Domain\Decision\FitnessDecision;
 use Procorad\Procostat\DTO\LabEvaluation;
 use RuntimeException;
@@ -61,6 +63,18 @@ final class DecideLaboratoryFitness
             fitnessStatus: $fitnessStatus,
             decisionBasis: $decisionBasis
         );
+
+        $context['auditTrail'] ??= new AuditTrail();
+
+        $context['auditTrail']->add(
+        AuditBuilder::fromDecision(
+            laboratoryCode: $context['laboratoryCode'],
+            status: $fitnessStatus,
+            decisionBasis: $decisionBasis,
+            decisionScore: $decisionScore,
+            thresholds: $thresholds
+        )
+    );
 
         return $context;
     }
