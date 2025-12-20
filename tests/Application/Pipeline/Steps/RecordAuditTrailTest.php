@@ -7,6 +7,7 @@ use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 use Procorad\Procostat\Domain\Audit\AuditTrail;
 use Procorad\Procostat\Domain\Norms\NormReference;
+use Procorad\Procostat\Domain\Decision\EvaluationValidity;
 use Procorad\Procostat\Domain\Decision\FitnessStatus;
 use Procorad\Procostat\DTO\LabEvaluation;
 use Procorad\Procostat\Infrastructure\Audit\NullAuditStore;
@@ -31,6 +32,7 @@ final class RecordAuditTrailTest extends TestCase
                 zetaScore: 1.2,
                 biasPercent: 5.0,
                 fitnessStatus: FitnessStatus::CONFORME,
+                evaluationValidity: EvaluationValidity::OFFICIAL,
                 decisionBasis: 'z_prime'
             ),
         ]);
@@ -70,6 +72,7 @@ final class RecordAuditTrailTest extends TestCase
                 zetaScore: null,
                 biasPercent: null,
                 fitnessStatus: FitnessStatus::DISCUTABLE,
+                evaluationValidity: EvaluationValidity::INFORMATIVE,
                 decisionBasis: 'z'
             ),
         ]);

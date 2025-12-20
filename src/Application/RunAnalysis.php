@@ -8,6 +8,7 @@ use Procorad\Procostat\Application\Pipeline\Steps\EvaluatePopulationSize;
 use Procorad\Procostat\Application\Pipeline\Steps\ComputePerformanceIndicators;
 use Procorad\Procostat\Application\Pipeline\Steps\DecideLaboratoryFitness;
 use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
+use Procorad\Procostat\Application\Resolvers\EvaluationValidityResolver;
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 use Procorad\Procostat\Contracts\AuditStore;
 use Procorad\Procostat\DTO\ProcostatResult;
@@ -33,14 +34,26 @@ final class RunAnalysis
 
         $context = $runner->run($input);
 
-        if (!isset($context['labEvaluation'], $context['auditTrail'])) {
+        if (!isset(
+                $context['labEvaluation'],
+                $context['auditTrail'],
+                $context['populationStatus']
+            )
+        ) {
             throw new \RuntimeException(
                 'Pipeline did not produce a complete ProcostatResult.'
             );
         }
 
+        $finalEvaluation = $context['labEvaluation']
+            ->withEvaluationValidity(
+                EvaluationValidityResolver::resolve(
+                    $context['populationStatus']
+                )
+            );
+
         return new ProcostatResult(
-            labEvaluation: $context['labEvaluation'],
+            labEvaluation: $finalEvaluation,
             auditTrail: $context['auditTrail'],
             engineVersion: Version::current()
         );

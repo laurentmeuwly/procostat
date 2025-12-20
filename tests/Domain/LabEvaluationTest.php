@@ -4,6 +4,7 @@ namespace Procorad\Procostat\Tests\Domain;
 
 use PHPUnit\Framework\TestCase;
 use Procorad\Procostat\DTO\LabEvaluation;
+use Procorad\Procostat\Domain\Decision\EvaluationValidity;
 use Procorad\Procostat\Domain\Decision\FitnessStatus;
 
 final class LabEvaluationTest extends TestCase
@@ -17,7 +18,8 @@ final class LabEvaluationTest extends TestCase
             zetaScore: 1.10,
             biasPercent: 8.5,
             fitnessStatus: FitnessStatus::CONFORME,
-            decisionBasis: 'z_prime'
+            decisionBasis: 'z_prime',
+            evaluationValidity: EvaluationValidity::OFFICIAL
         );
 
         $this->assertSame('LAB-042', $evaluation->laboratoryCode);
@@ -25,5 +27,6 @@ final class LabEvaluationTest extends TestCase
         $this->assertEquals(1.45, $evaluation->zPrimeScore);
         $this->assertSame(FitnessStatus::CONFORME, $evaluation->fitnessStatus);
         $this->assertSame('z_prime', $evaluation->decisionBasis);
+        $this->assertSame(EvaluationValidity::OFFICIAL, $evaluation->evaluationValidity);
     }
 }
