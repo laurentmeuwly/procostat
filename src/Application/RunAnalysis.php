@@ -24,9 +24,9 @@ final class RunAnalysis
     public function __invoke(array $input): ProcostatResult
     {
         $runner = new PipelineRunner([
-            //new ValidateDataset(),
-            //new EvaluatePopulationSize(),
-            //new ComputePerformanceIndicators(),
+            new ValidateDataset(),
+            new EvaluatePopulationSize(),
+            new ComputePerformanceIndicators(),
             new DecideLaboratoryFitness($this->thresholdsResolver),
             new RecordAuditTrail($this->thresholdsResolver, $this->auditStore),
         ]);

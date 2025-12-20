@@ -23,6 +23,7 @@ final class RunAnalysisTest extends TestCase
 
         $result = $useCase([
             'laboratoryCode' => 'LAB-042',
+            'participantCount' => 12,
             'zPrimeScore' => 1.7,
             'zetaScore' => 1.3,
             'biasPercent' => 4.2,
