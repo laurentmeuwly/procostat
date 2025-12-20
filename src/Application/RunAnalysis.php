@@ -10,6 +10,8 @@ use Procorad\Procostat\Application\Pipeline\Steps\DecideLaboratoryFitness;
 use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 use Procorad\Procostat\Contracts\AuditStore;
+use Procorad\Procostat\DTO\ProcostatResult;
+use Procorad\Procostat\Support\Version;
 
 final class RunAnalysis
 {
@@ -19,11 +21,7 @@ final class RunAnalysis
     ) {
     }
 
-    /**
-     * @param array<string, mixed> $input
-     * @return array<string, mixed>
-     */
-    public function __invoke(array $input): array
+    public function __invoke(array $input): ProcostatResult
     {
         $runner = new PipelineRunner([
             //new ValidateDataset(),
@@ -33,6 +31,18 @@ final class RunAnalysis
             new RecordAuditTrail($this->thresholdsResolver, $this->auditStore),
         ]);
 
-        return $runner->run($input);
+        $context = $runner->run($input);
+
+        if (!isset($context['labEvaluation'], $context['auditTrail'])) {
+            throw new \RuntimeException(
+                'Pipeline did not produce a complete ProcostatResult.'
+            );
+        }
+
+        return new ProcostatResult(
+            labEvaluation: $context['labEvaluation'],
+            auditTrail: $context['auditTrail'],
+            engineVersion: Version::current()
+        );
     }
 }

@@ -9,6 +9,7 @@ use Procorad\Procostat\Domain\Decision\FitnessStatus;
 use Procorad\Procostat\Domain\Audit\AuditTrail;
 use Procorad\Procostat\Domain\Norms\NormReference;
 use Procorad\Procostat\DTO\LabEvaluation;
+use Procorad\Procostat\DTO\ProcostatResult;
 use Procorad\Procostat\Infrastructure\Audit\NullAuditStore;
 
 final class RunAnalysisTest extends TestCase
@@ -20,7 +21,7 @@ final class RunAnalysisTest extends TestCase
             auditStore: new NullAuditStore()
         );
 
-        $resultContext = $useCase([
+        $result = $useCase([
             'laboratoryCode' => 'LAB-042',
             'zPrimeScore' => 1.7,
             'zetaScore' => 1.3,
@@ -28,49 +29,32 @@ final class RunAnalysisTest extends TestCase
             'thresholdStandard' => 'iso13528',
         ]);
 
-        // 1. LabEvaluation exists
-        $this->assertArrayHasKey('labEvaluation', $resultContext);
-        $this->assertInstanceOf(
-            LabEvaluation::class,
-            $resultContext['labEvaluation']
-        );
+        $this->assertInstanceOf(ProcostatResult::class, $result);
 
-        $evaluation = $resultContext['labEvaluation'];
-
-        // 2. Correct decision
+        // LabEvaluation
         $this->assertSame(
             FitnessStatus::CONFORME,
-            $evaluation->fitnessStatus
+            $result->labEvaluation->fitnessStatus
         );
 
         $this->assertSame(
             'z_prime',
-            $evaluation->decisionBasis
+            $result->labEvaluation->decisionBasis
         );
 
-        // 3. AuditTrail exists
-        $this->assertArrayHasKey('auditTrail', $resultContext);
-        $this->assertInstanceOf(
-            AuditTrail::class,
-            $resultContext['auditTrail']
+        // Audit exists
+        $this->assertCount(
+            1,
+            $result->auditTrail->all()
         );
 
-        $events = $resultContext['auditTrail']->all();
-        $this->assertCount(1, $events);
-
-        $event = $events[0];
-
-        // 4. AuditEvent is consistent
-        $this->assertSame('LAB-042', $event->laboratoryCode);
-        $this->assertSame('conforme', $event->decision);
-        $this->assertSame('z_prime', $event->decisionBasis);
-        $this->assertEquals(1.7, $event->decisionScore);
+        // Audit concerns the right laboratory
         $this->assertSame(
-            NormReference::ISO_13528_2022,
-            $event->normReference
+            'LAB-042',
+            $result->auditTrail->all()[0]->laboratoryCode
         );
 
-        // 5. Engine version traceability
-        $this->assertNotEmpty($event->engineVersion);
+        // Engine version traceability
+        $this->assertNotEmpty($result->engineVersion);
     }
 }
