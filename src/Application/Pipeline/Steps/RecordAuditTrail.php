@@ -3,6 +3,7 @@
 namespace Procorad\Procostat\Application\Pipeline\Steps;
 
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
+use Procorad\Procostat\Contracts\AuditStore;
 use Procorad\Procostat\Domain\Audit\AuditBuilder;
 use Procorad\Procostat\Domain\Audit\AuditTrail;
 use Procorad\Procostat\DTO\LabEvaluation;
@@ -11,7 +12,8 @@ use RuntimeException;
 final class RecordAuditTrail
 {
     public function __construct(
-        private readonly ThresholdsResolver $thresholdsResolver
+        private readonly ThresholdsResolver $thresholdsResolver,
+        private readonly AuditStore $auditStore
     ) {
     }
 
@@ -48,7 +50,7 @@ final class RecordAuditTrail
 
         [$decisionScore, $decisionBasis] = $this->resolveDecisionScore($context);
 
-        // Sanity: l'audit doit refléter la même base que la décision
+        // Sanity: the audit must reflect the same basis as the decision
         if ($context['labEvaluation']->decisionBasis !== $decisionBasis) {
             throw new RuntimeException(
                 'Decision basis mismatch between labEvaluation and available scores in context.'
@@ -59,15 +61,16 @@ final class RecordAuditTrail
 
         $trail = $context['auditTrail'] ?? new AuditTrail();
 
-        $trail->add(
-            AuditBuilder::fromDecision(
-                laboratoryCode: $context['laboratoryCode'],
-                status: $context['labEvaluation']->fitnessStatus,
-                decisionBasis: $decisionBasis,
-                decisionScore: $decisionScore,
-                thresholds: $thresholds
-            )
+        $event = AuditBuilder::fromDecision(
+            laboratoryCode: $context['laboratoryCode'],
+            status: $context['labEvaluation']->fitnessStatus,
+            decisionBasis: $decisionBasis,
+            decisionScore: $decisionScore,
+            thresholds: $thresholds
         );
+
+        $trail->add($event);
+        $this->auditStore->store($event);
 
         $context['auditTrail'] = $trail;
 

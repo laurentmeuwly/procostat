@@ -9,6 +9,7 @@ use Procorad\Procostat\Application\Pipeline\Steps\ComputePerformanceIndicators;
 use Procorad\Procostat\Application\Pipeline\Steps\DecideLaboratoryFitness;
 use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
+use Procorad\Procostat\Infrastructure\Audit\NullAuditStore;
 
 final class RunAnalysis
 {
@@ -28,7 +29,7 @@ final class RunAnalysis
             //new EvaluatePopulationSize(),
             //new ComputePerformanceIndicators(),
             new DecideLaboratoryFitness($this->thresholdsResolver),
-            new RecordAuditTrail($this->thresholdsResolver),
+            new RecordAuditTrail($this->thresholdsResolver, new NullAuditStore()),
         ]);
 
         return $runner->run($input);
