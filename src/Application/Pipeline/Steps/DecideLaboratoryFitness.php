@@ -64,18 +64,6 @@ final class DecideLaboratoryFitness
             decisionBasis: $decisionBasis
         );
 
-        $context['auditTrail'] ??= new AuditTrail();
-
-        $context['auditTrail']->add(
-        AuditBuilder::fromDecision(
-            laboratoryCode: $context['laboratoryCode'],
-            status: $fitnessStatus,
-            decisionBasis: $decisionBasis,
-            decisionScore: $decisionScore,
-            thresholds: $thresholds
-        )
-    );
-
         return $context;
     }
 
