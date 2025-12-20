@@ -1,7 +1,19 @@
 <?php
 
 return [
-    'fitness' => [
-        'threshold_standard' => 'iso13528',
-    ],
+
+     /*
+    |--------------------------------------------------------------------------
+    | Threshold standard
+    |--------------------------------------------------------------------------
+    |
+    | Normative reference used for performance thresholds.
+    | Supported values:
+    | - iso13528
+    | - iso13528_2015
+    | - iso13528_2022
+    |
+    */
+
+    'threshold_standard' => 'iso13528',
 ];
