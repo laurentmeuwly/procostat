@@ -9,13 +9,15 @@ use Procorad\Procostat\Domain\Decision\FitnessStatus;
 use Procorad\Procostat\Domain\Audit\AuditTrail;
 use Procorad\Procostat\Domain\Norms\NormReference;
 use Procorad\Procostat\DTO\LabEvaluation;
+use Procorad\Procostat\Infrastructure\Audit\NullAuditStore;
 
 final class RunAnalysisTest extends TestCase
 {
     public function test_run_analysis_produces_lab_evaluation_and_audit(): void
     {
         $useCase = new RunAnalysis(
-            new ThresholdsResolver()
+            thresholdsResolver: new ThresholdsResolver(),
+            auditStore: new NullAuditStore()
         );
 
         $resultContext = $useCase([

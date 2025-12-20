@@ -9,12 +9,16 @@ use Procorad\Procostat\Domain\Audit\AuditTrail;
 use Procorad\Procostat\Domain\Norms\NormReference;
 use Procorad\Procostat\Domain\Decision\FitnessStatus;
 use Procorad\Procostat\DTO\LabEvaluation;
+use Procorad\Procostat\Infrastructure\Audit\NullAuditStore;
 
 final class RecordAuditTrailTest extends TestCase
 {
     public function test_it_creates_audit_trail_if_missing_and_appends_event(): void
     {
-        $step = new RecordAuditTrail(new ThresholdsResolver());
+        $step = new RecordAuditTrail(
+            new ThresholdsResolver(),
+            new NullAuditStore()
+        );
 
         $context = $step([
             'laboratoryCode' => 'LAB-007',
@@ -47,7 +51,10 @@ final class RecordAuditTrailTest extends TestCase
 
     public function test_it_appends_to_existing_audit_trail(): void
     {
-        $step = new RecordAuditTrail(new ThresholdsResolver());
+        $step = new RecordAuditTrail(
+            new ThresholdsResolver(),
+            new NullAuditStore()
+        );
 
         $trail = new AuditTrail();
 
