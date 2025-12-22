@@ -8,7 +8,7 @@ use Procorad\Procostat\Domain\Statistics\Robust\AssignedValueCalculator;
 use Procorad\Procostat\Domain\Statistics\Robust\RobustStdDev;
 use RuntimeException;
 
-final class ComputePopulationStatistics
+final class ComputeRobustStatistics
 {
     /**
      * @param array{
