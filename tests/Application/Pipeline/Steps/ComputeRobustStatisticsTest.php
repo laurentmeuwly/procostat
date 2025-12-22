@@ -3,12 +3,12 @@
 namespace Procorad\Procostat\Tests\Application\Pipeline\Steps;
 
 use PHPUnit\Framework\TestCase;
-use Procorad\Procostat\Application\Pipeline\Steps\ComputePopulationStatistics;
+use Procorad\Procostat\Application\Pipeline\Steps\ComputeRobustStatistics;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Rules\PopulationStatus;
 
-final class ComputePopulationStatisticsTest extends TestCase
+final class ComputeRobustStatisticsTest extends TestCase
 {
     private function dataset(): AnalysisDataset
     {
@@ -25,7 +25,7 @@ final class ComputePopulationStatisticsTest extends TestCase
 
     public function test_no_statistics_when_population_not_exploitable(): void
     {
-        $step = new ComputePopulationStatistics();
+        $step = new ComputeRobustStatistics();
 
         $context = $step([
             'dataset' => $this->dataset(),
@@ -38,7 +38,7 @@ final class ComputePopulationStatisticsTest extends TestCase
 
     public function test_statistics_are_computed_for_exploitable_population(): void
     {
-        $step = new ComputePopulationStatistics();
+        $step = new ComputeRobustStatistics();
 
         $context = $step([
             'dataset' => $this->dataset(),
