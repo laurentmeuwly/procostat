@@ -2,38 +2,48 @@
 
 namespace Procorad\Procostat\Application\Pipeline\Steps;
 
-use Procorad\Procostat\Domain\Rules\PopulationRules;
-use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use RuntimeException;
+use Procorad\Procostat\DTO\AnalysisDataset;
+use Procorad\Procostat\Domain\Rules\PopulationRules;
 
 final class EvaluatePopulationSize
 {
     /**
-     * @param array{
-     *   participantCount: int
-     * } $context
-     *
-     * @return array{
-     *   participantCount: int,
-     *   populationStatus: PopulationStatus
-     * }
+     * @param array<string, mixed> $context
+     * @return array<string, mixed>
      */
     public function __invoke(array $context): array
     {
-        if (!isset($context['participantCount'])) {
+        if (
+            !isset($context['dataset'])
+            || !$context['dataset'] instanceof AnalysisDataset
+        ) {
             throw new RuntimeException(
-                'EvaluatePopulationSize requires participantCount.'
+                'EvaluatePopulationSize requires an AnalysisDataset.'
             );
         }
 
-        $n = $context['participantCount'];
+        /** @var AnalysisDataset $dataset */
+        $dataset = $context['dataset'];
 
-        if (!is_int($n) || $n < 0) {
+        // Derive participant count from distinct laboratory codes
+        $laboratoryCodes = [];
+
+        foreach ($dataset->measurements() as $measurement) {
+            $laboratoryCodes[$measurement->laboratoryCode] = true;
+        }
+
+        $n = count($laboratoryCodes);
+
+        if ($n < 0) {
+            // pure safety net; should never happen
             throw new RuntimeException(
-                'participantCount must be a non-negative integer.'
+                'Derived participantCount must be non-negative.'
             );
         }
 
+        // Keep existing domain rule
+        $context['participantCount'] = $n;
         $context['populationStatus'] = PopulationRules::evaluate($n);
 
         return $context;

@@ -39,8 +39,7 @@ final class RunAnalysis
         $context = [
             'dataset' => $dataset,
             'participantCount' => $dataset->count(),
-            'thresholdStandard' => $input['thresholdStandard']
-                ?? config('procostat.threshold_standard'),
+            'thresholdStandard' => $input['thresholdStandard'],
         ];
 
         // temp: here the pipeline is mon-labo

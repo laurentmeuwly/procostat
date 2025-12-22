@@ -38,11 +38,11 @@ final class DecideLaboratoryFitness
      */
     public function __invoke(array $context): array
     {
-        if (!isset($context['laboratoryCode'], $context['thresholdStandard'])) {
+        /*if (!isset($context['laboratoryCode'], $context['thresholdStandard'])) {
             throw new RuntimeException(
                 'DecideLaboratoryFitness requires laboratoryCode and thresholdStandard.'
             );
-        }
+        }*/
 
         [$decisionScore, $decisionBasis] = $this->resolveDecisionScore($context);
 
