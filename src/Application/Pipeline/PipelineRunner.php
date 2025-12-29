@@ -2,27 +2,24 @@
 
 namespace Procorad\Procostat\Application\Pipeline;
 
+use Procorad\Procostat\Application\AnalysisContext;
 use RuntimeException;
 
 final class PipelineRunner
 {
     /**
-     * @param iterable<callable> $steps
+     * @param iterable<PipelineStep> $steps
      */
     public function __construct(
         private readonly iterable $steps
     ) {
     }
 
-    /**
-     * @param array<string, mixed> $context
-     * @return array<string, mixed>
-     */
-    public function run(array $context): array
+    public function run(AnalysisContext $context): AnalysisContext
     {
         foreach ($this->steps as $step) {
-            if (!is_callable($step)) {
-                throw new RuntimeException('Pipeline step is not callable.');
+            if (!$step instanceof PipelineStep) {
+                throw new RuntimeException('Pipeline step must implement PipelineStep.');
             }
 
             $context = $step($context);

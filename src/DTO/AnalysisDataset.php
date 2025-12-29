@@ -17,6 +17,11 @@ final class AnalysisDataset
     public function __construct(
         array $measurements,
         public readonly AssignedValueSpecification $assignedValueSpec,
+        public readonly string $campaign,
+        public readonly string $sampleCode,
+        public readonly string $radionuclide,
+        public readonly string $unit,
+        public readonly ?bool $isStable = null
     ) {
         if ($measurements === []) {
             throw new RuntimeException(

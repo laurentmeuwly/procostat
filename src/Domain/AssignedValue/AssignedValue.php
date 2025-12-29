@@ -2,13 +2,33 @@
 
 namespace Procorad\Procostat\Domain\AssignedValue;
 
+use RuntimeException;
+
 final class AssignedValue
 {
     private function __construct(
         private readonly AssignedValueType $type,
         private readonly float $value,
-        private readonly float $expandedUncertaintyK2
-    ) {}
+        private readonly ?float $expandedUncertaintyK2
+    ) {
+        if (!is_finite($this->value)) {
+            throw new RuntimeException(
+                'Assigned value must be a finite number.'
+            );
+        }
+
+        if ($this->type === AssignedValueType::CERTIFIED && $this->expandedUncertaintyK2 === null) {
+            throw new RuntimeException(
+                'Certified assigned value requires an expanded uncertainty.'
+            );
+        }
+
+        if ($this->expandedUncertaintyK2 !== null && $this->expandedUncertaintyK2 < 0) {
+            throw new RuntimeException(
+                'Expanded uncertainty must be non-negative.'
+            );
+        }
+    }
 
     /**
      * Named constructors
@@ -27,7 +47,7 @@ final class AssignedValue
 
     public static function robust(
         float $value,
-        float $expandedUncertaintyK2
+        ?float $expandedUncertaintyK2 = null
     ): self {
         return new self(
             AssignedValueType::ROBUST_MEAN,
@@ -49,7 +69,7 @@ final class AssignedValue
         return $this->value;
     }
 
-    public function expandedUncertaintyK2(): float
+    public function expandedUncertaintyK2(): ?float
     {
         return $this->expandedUncertaintyK2;
     }
@@ -57,7 +77,7 @@ final class AssignedValue
     /**
      * Standard uncertainty (u = U / k, where k=2)
      */
-    public function standardUncertainty(): float
+    public function standardUncertainty(): ?float
     {
         return $this->expandedUncertaintyK2 / 2;
     }
@@ -69,5 +89,10 @@ final class AssignedValue
     public function isIndependent(): bool
     {
         return $this->type === AssignedValueType::CERTIFIED;
+    }
+
+    public function hasUncertainty(): bool
+    {
+        return $this->expandedUncertaintyK2 !== null;
     }
 }

@@ -3,51 +3,77 @@
 namespace Procorad\Procostat\Tests\Application\Pipeline\Steps;
 
 use PHPUnit\Framework\TestCase;
+use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\Steps\ComputeRobustStatistics;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\Domain\Measurements\Measurement;
+use Procorad\Procostat\Domain\Measurements\Uncertainty;
+use Procorad\Procostat\Domain\Population\Population;
 use Procorad\Procostat\Domain\Rules\PopulationStatus;
+use Procorad\Procostat\Domain\Statistics\RobustStatistics;
+use RuntimeException;
 
 final class ComputeRobustStatisticsTest extends TestCase
 {
-    private function dataset(): AnalysisDataset
+    private function population(): Population
     {
-        return new AnalysisDataset([
-            new Measurement('LAB-1', 10.0),
-            new Measurement('LAB-2', 10.2),
-            new Measurement('LAB-3', 9.8),
-            new Measurement('LAB-4', 10.1),
-            new Measurement('LAB-5', 9.9),
-            new Measurement('LAB-6', 10.3),
-            new Measurement('LAB-7', 10.0),
+        return new Population([
+            new Measurement('LAB-1', 10.0, new Uncertainty(0.5)),
+            new Measurement('LAB-2', 10.2, new Uncertainty(0.5)),
+            new Measurement('LAB-3', 9.8, new Uncertainty(0.5)),
+            new Measurement('LAB-4', 10.1, new Uncertainty(0.5)),
+            new Measurement('LAB-5', 9.9, new Uncertainty(0.5)),
+            new Measurement('LAB-6', 10.3, new Uncertainty(0.5)),
+            new Measurement('LAB-7', 10.0, new Uncertainty(0.5)),
         ]);
     }
 
-    public function test_no_statistics_when_population_not_exploitable(): void
+    private function dummyDataset(): AnalysisDataset
     {
-        $step = new ComputeRobustStatistics();
-
-        $context = $step([
-            'dataset' => $this->dataset(),
-            'populationStatus' => PopulationStatus::NOT_EXPLOITABLE,
-        ]);
-
-        $this->assertNull($context['assignedValue']);
-        $this->assertNull($context['populationStdDev']);
+        return new \Procorad\Procostat\DTO\AnalysisDataset(
+            measurements: [
+                new Measurement('DUMMY', 1.0, new Uncertainty(0.1))
+            ],
+            assignedValueSpec: new \Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification(
+                \Procorad\Procostat\Domain\AssignedValue\AssignedValueType::ROBUST_MEAN,
+                null,
+                null
+            ),
+            campaign: '2025',
+            sampleCode: 'TEST',
+            radionuclide: 'Cs-137',
+            unit: 'Bq/kg'
+        );
     }
 
-    public function test_statistics_are_computed_for_exploitable_population(): void
+    private function contextWithPopulation(): AnalysisContext
     {
-        $step = new ComputeRobustStatistics();
+        return new AnalysisContext(
+            dataset: $this->dummyDataset(),
+            population: $this->population()
+        );
+    }
 
-        $context = $step([
-            'dataset' => $this->dataset(),
-            'populationStatus' => PopulationStatus::FULL_EVALUATION,
-        ]);
+    public function test_robust_statistics_are_computed(): void
+    {
+        $context = $this->contextWithPopulation();
 
-        $this->assertNotNull($context['assignedValue']);
-        $this->assertNotNull($context['populationStdDev']);
-        $this->assertIsFloat($context['assignedValue']);
-        $this->assertIsFloat($context['populationStdDev']);
+        $result = (new ComputeRobustStatistics())($context);
+
+        $this->assertInstanceOf(
+            RobustStatistics::class,
+            $result->robustStatistics
+        );
+    }
+
+    public function test_missing_population_throws_exception(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        $context = new AnalysisContext(
+            dataset: $this->dummyDataset()
+        );
+
+        (new ComputeRobustStatistics())($context);
     }
 }
