@@ -5,7 +5,6 @@ namespace Procorad\Procostat\Application\Pipeline\Steps;
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Domain\Measurements\Measurement;
-use Procorad\Procostat\DTO\AnalysisDataset;
 use RuntimeException;
 
 final class ValidateDataset implements PipelineStep
