@@ -17,4 +17,22 @@ final class AuditTrail
     {
         return $this->events;
     }
+
+    /** @return AuditEvent[] */
+    public function analysisEvents(): array
+    {
+        return array_filter(
+            $this->events,
+            fn (AuditEvent $e) => $e->type === AuditEventType::ANALYSIS
+        );
+    }
+
+    /** @return AuditEvent[] */
+    public function labEvents(): array
+    {
+        return array_filter(
+            $this->events,
+            fn (AuditEvent $e) => $e->type === AuditEventType::LAB_DECISION
+        );
+    }
 }

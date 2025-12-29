@@ -9,6 +9,25 @@ use Procorad\Procostat\Support\Version;
 
 final class AuditBuilder
 {
+    public static function analysisDecision(
+        string $decision,
+        string $basis,
+        ?string $normReference = null
+    ): AuditEvent {
+        return new AuditEvent(
+            type: AuditEventType::ANALYSIS,
+            laboratoryCode: null,
+            decision: $decision,
+            decisionBasis: $basis,
+            decisionScore: null,
+            normReference: $normReference,
+            conformityLimit: null,
+            discussionLimit: null,
+            occurredAt: new DateTimeImmutable(),
+            engineVersion: Version::current()
+        );
+    }
+
     public static function fromDecision(
         string $laboratoryCode,
         FitnessStatus $status,
@@ -17,6 +36,7 @@ final class AuditBuilder
         Thresholds $thresholds
     ): AuditEvent {
         return new AuditEvent(
+            type: AuditEventType::LAB_DECISION,
             laboratoryCode: $laboratoryCode,
             decision: $status->value,
             decisionBasis: $decisionBasis,
