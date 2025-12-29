@@ -25,41 +25,5 @@ final class ComputeRobustStatistics implements PipelineStep
             RobustStatisticsCalculator::compute($context->population);
 
         return $context;
-
-        /*
-        if (
-            !isset($context['dataset'], $context['populationStatus'])
-            || !$context['dataset'] instanceof AnalysisDataset
-        ) {
-            throw new RuntimeException(
-                'ComputePopulationStatistics requires dataset and populationStatus.'
-            );
-        }
-
-        $dataset = $context['dataset'];
-        $status = $context['populationStatus'];
-
-        // Default: no statistics
-        $context['assignedValue'] = null;
-        $context['populationStdDev'] = null;
-
-        if (!ApplicabilityRules::canComputeRobustStatistics($status)) return $context;
-
-        $values = $dataset->values();
-
-        if (count($values) === 0) {
-            throw new RuntimeException(
-                'Cannot compute population statistics on empty dataset.'
-            );
-        }
-
-        foreach ($values as $v) {
-            if (!is_finite($v)) throw new RuntimeException('Dataset contains non-finite values.');
-        }
-
-        $context['assignedValue'] = AssignedValueCalculator::fromValues($values);
-        $context['populationStdDev'] = RobustStdDev::fromValues($values);
-
-        return $context;*/
     }
 }

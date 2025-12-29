@@ -11,7 +11,7 @@ use Procorad\Procostat\Domain\Audit\AuditTrail;
 use Procorad\Procostat\DTO\LabEvaluation;
 use RuntimeException;
 
-final class RecordAuditTrail
+final class RecordAuditTrail implements PipelineStep
 {
     public function __construct(
         private readonly AuditStore $auditStore

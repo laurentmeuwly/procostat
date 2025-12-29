@@ -1,6 +1,6 @@
 <?php
 
-namespace Procorad\Procostat\Contract;
+namespace Procorad\Procostat\Contracts;
 
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\ProcostatResult;

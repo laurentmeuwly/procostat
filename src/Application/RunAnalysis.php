@@ -2,85 +2,81 @@
 
 namespace Procorad\Procostat\Application;
 
-use Procorad\Procostat\Application\Pipeline\PipelineRunner;
-use Procorad\Procostat\Application\Pipeline\Steps\ValidateDataset;
-use Procorad\Procostat\Application\Pipeline\Steps\EvaluatePopulationSize;
-use Procorad\Procostat\Application\Pipeline\Steps\ComputePerformanceIndicators;
-use Procorad\Procostat\Application\Pipeline\Steps\ComputePopulationStatistics;
-use Procorad\Procostat\Application\Pipeline\Steps\DecideLaboratoryFitness;
-use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
-use Procorad\Procostat\Application\Resolvers\EvaluationValidityResolver;
-use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
+use Procorad\Procostat\Contracts\AnalysisEngine;
+use Procorad\Procostat\Contracts\NormalityAdapter;
 use Procorad\Procostat\Contracts\AuditStore;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\ProcostatResult;
 use Procorad\Procostat\Support\Version;
+use Procorad\Procostat\Application\Pipeline\PipelineRunner;
+use Procorad\Procostat\Application\Pipeline\Steps\ValidateDataset;
+use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulation;
+use Procorad\Procostat\Application\Pipeline\Steps\EvaluatePopulationSize;
+use Procorad\Procostat\Application\Pipeline\Steps\ComputeRobustStatistics;
+use Procorad\Procostat\Application\Pipeline\Steps\ResolveAssignedValue;
+use Procorad\Procostat\Application\Pipeline\Steps\DecidePrimaryIndicator;
+use Procorad\Procostat\Application\Pipeline\Steps\CheckNormality;
+use Procorad\Procostat\Application\Pipeline\Steps\DetectOutliers;
+use Procorad\Procostat\Application\Pipeline\Steps\EvaluateLaboratories;
+use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulationSummary;
+use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
+use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 use RuntimeException;
 
-final class RunAnalysis
+final class RunAnalysis implements AnalysisEngine
 {
     public function __construct(
+        private readonly NormalityAdapter $normalityAdapter,
+        private readonly AuditStore $auditStore,
+        private readonly AssignedValueResolver $assignedValueResolver,
         private readonly ThresholdsResolver $thresholdsResolver,
-        private readonly AuditStore $auditStore
-    ) {
-    }
+        private readonly string $thresholdStandard // injected via config
+    ) {}
 
-    public function __invoke(array $input): ProcostatResult
+    public function analyze(AnalysisDataset $dataset): ProcostatResult
     {
-        if (!isset($input['dataset']) || !$input['dataset'] instanceof AnalysisDataset) {
-            throw new RuntimeException(
-                'RunAnalysis requires an AnalysisDataset as input.'
-            );
-        }
+        $context = new AnalysisContext(
+            dataset: $dataset,
+            thresholdStandard: $this->thresholdStandard
+        );
 
-        $dataset = $input['dataset'];
-
-        // prepare context pipeline
-        $context = [
-            'dataset' => $dataset,
-            'participantCount' => $dataset->count(),
-            'thresholdStandard' => $input['thresholdStandard'],
-        ];
-
-        // temp: here the pipeline is mon-labo
         $runner = new PipelineRunner([
             new ValidateDataset(),
+            new BuildPopulation(),
             new EvaluatePopulationSize(),
-            new ComputePopulationStatistics(),
-            new ComputePerformanceIndicators(),
-            new DecideLaboratoryFitness($this->thresholdsResolver),
-            new RecordAuditTrail($this->thresholdsResolver, $this->auditStore),
+            new ComputeRobustStatistics(),
+            new ResolveAssignedValue($this->assignedValueResolver),
+            new DecidePrimaryIndicator(),
+            new CheckNormality($this->normalityAdapter),
+            new DetectOutliers(),
+            new EvaluateLaboratories($this->thresholdsResolver),
+            new BuildPopulationSummary(),
+            new RecordAuditTrail($this->auditStore),
         ]);
 
-        $context = $runner->run($input);
+        $finalContext = $runner->run($context);
 
-        if (!isset(
-                $context['labEvaluation'],
-                $context['auditTrail'],
-                $context['populationStatus']
-            )
+        if (
+            $finalContext->assignedValue === null ||
+            $finalContext->robustStatistics === null ||
+            $finalContext->populationSummary === null ||
+            $finalContext->primaryIndicator === null ||
+            $finalContext->auditTrail === null
         ) {
             throw new \RuntimeException(
-                'Pipeline did not produce a complete ProcostatResult.'
+                'RunAnalysis pipeline did not produce a complete ProcostatResult.'
             );
         }
 
-        $finalEvaluation = $context['labEvaluation']
-            ->withEvaluationValidity(
-                EvaluationValidityResolver::resolve(
-                    $context['populationStatus']
-                )
-            );
-
         return new ProcostatResult(
-            labEvaluation: $finalEvaluation,
-            auditTrail: $context['auditTrail'],
+            assignedValue: $finalContext->assignedValue,
+            robustStatistics: $finalContext->robustStatistics,
+            populationSummary: $finalContext->populationSummary,
+            primaryIndicator: $finalContext->primaryIndicator,
+            labEvaluations: $finalContext->labEvaluations,
+            auditTrail: $finalContext->auditTrail,
             engineVersion: Version::current()
         );
-    }
-
-    public function run(array $input): ProcostatResult
-    {
-        return ($this)($input);
     }
 }
