@@ -1,6 +1,6 @@
 <?php
 
-namespace Procorad\Procostat\Application\Contracts;
+namespace Procorad\Procostat\Contracts;
 
 use Procorad\Procostat\Domain\Statistics\NormalityResult;
 

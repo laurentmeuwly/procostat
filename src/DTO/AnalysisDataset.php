@@ -2,6 +2,7 @@
 
 namespace Procorad\Procostat\DTO;
 
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use RuntimeException;
 
@@ -13,8 +14,10 @@ final class AnalysisDataset
     /**
      * @param Measurement[] $measurements
      */
-    public function __construct(array $measurements)
-    {
+    public function __construct(
+        array $measurements,
+        public readonly AssignedValueSpecification $assignedValueSpec,
+    ) {
         if ($measurements === []) {
             throw new RuntimeException(
                 'AnalysisDataset cannot be empty.'
