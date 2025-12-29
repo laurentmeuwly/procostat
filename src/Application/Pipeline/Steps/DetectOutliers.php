@@ -11,6 +11,11 @@ final class DetectOutliers
 {
     public function __invoke(array $context): array
     {
+        if ($context['normality'] === null) {
+            $context['outliers'] = null;
+            return $context;
+        }
+
         if (!isset(
             $context['dataset'],
             $context['populationStatus'],

@@ -9,6 +9,7 @@ final class NormalityResult
         public readonly ?float $shapiroWilkPValue,
         public readonly ?float $skewness,
         public readonly ?float $kurtosis,
-        public readonly string $conclusion
+        public readonly string $conclusion,
+        public readonly ?array $henryLine
     ) {}
 }

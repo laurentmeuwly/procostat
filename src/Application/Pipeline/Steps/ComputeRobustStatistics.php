@@ -6,6 +6,7 @@ use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use Procorad\Procostat\Domain\Statistics\Robust\AssignedValueCalculator;
 use Procorad\Procostat\Domain\Statistics\Robust\RobustStdDev;
+use Procorad\Procostat\Domain\Rules\ApplicabilityRules;
 use RuntimeException;
 
 final class ComputeRobustStatistics
@@ -36,9 +37,7 @@ final class ComputeRobustStatistics
         $context['assignedValue'] = null;
         $context['populationStdDev'] = null;
 
-        if ($status === PopulationStatus::NOT_EXPLOITABLE) {
-            return $context;
-        }
+        if (!ApplicabilityRules::canComputeRobustStatistics($status)) return $context;
 
         $values = $dataset->values();
 
@@ -46,6 +45,10 @@ final class ComputeRobustStatistics
             throw new RuntimeException(
                 'Cannot compute population statistics on empty dataset.'
             );
+        }
+
+        foreach ($values as $v) {
+            if (!is_finite($v)) throw new RuntimeException('Dataset contains non-finite values.');
         }
 
         $context['assignedValue'] = AssignedValueCalculator::fromValues($values);

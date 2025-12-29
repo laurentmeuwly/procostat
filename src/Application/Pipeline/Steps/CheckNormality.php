@@ -2,7 +2,7 @@
 
 namespace Procorad\Procostat\Application\Pipeline\Steps;
 
-use Procorad\Procostat\Application\Contracts\NormalityAdapter;
+use Procorad\Procostat\Contracts\NormalityAdapter;
 use Procorad\Procostat\Domain\Rules\ApplicabilityRules;
 use RuntimeException;
 
@@ -19,6 +19,8 @@ final class CheckNormality
                 'CheckNormality requires dataset and populationStatus.'
             );
         }
+
+        $context['normality'] = null;
 
         if (!ApplicabilityRules::canCheckNormality($context['populationStatus'])) {
             $context['normality'] = null;
