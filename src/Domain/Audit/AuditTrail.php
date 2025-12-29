@@ -28,7 +28,7 @@ final class AuditTrail
     }
 
     /** @return AuditEvent[] */
-    public function labEvents(): array
+    public function labDecisionEvents(): array
     {
         return array_filter(
             $this->events,

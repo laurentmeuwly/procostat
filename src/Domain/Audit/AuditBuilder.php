@@ -28,7 +28,7 @@ final class AuditBuilder
         );
     }
 
-    public static function fromDecision(
+    public static function labDecision(
         string $laboratoryCode,
         FitnessStatus $status,
         string $decisionBasis,
