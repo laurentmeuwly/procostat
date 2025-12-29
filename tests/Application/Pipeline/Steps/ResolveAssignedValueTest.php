@@ -36,7 +36,10 @@ final class ResolveAssignedValueTest extends TestCase
             unit: 'Bq/kg'
         );
 
-        $context = new AnalysisContext($dataset);
+        $context = new AnalysisContext(
+            dataset: $dataset,
+            thresholdStandard: 'iso13528'
+        );
         $context->population = new Population($dataset->measurements());
         $context->robustStatistics = new RobustStatistics(11.0, 1.0);
 

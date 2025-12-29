@@ -2,41 +2,49 @@
 
 namespace Procorad\Procostat\Application\Pipeline\Steps;
 
+use Procorad\Procostat\Application\AnalysisContext;
+use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Domain\Rules\ApplicabilityRules;
 use Procorad\Procostat\Domain\Statistics\Outliers\Dixon;
 use Procorad\Procostat\Domain\Statistics\Outliers\Grubbs;
 use RuntimeException;
 
-final class DetectOutliers
+final class DetectOutliers implements PipelineStep
 {
-    public function __invoke(array $context): array
+    public function __invoke(AnalysisContext $context): AnalysisContext
     {
-        if ($context['normality'] === null) {
-            $context['outliers'] = null;
-            return $context;
-        }
-
-        if (!isset(
-            $context['dataset'],
-            $context['populationStatus'],
-            $context['normality']
-        )) {
+        if ($context->population === null) {
             throw new RuntimeException(
-                'DetectOutliers requires dataset, populationStatus and normality.'
+                'DetectOutliers requires an existing Population.'
             );
         }
 
-        if (!ApplicabilityRules::canDetectOutliers(
-            $context['populationStatus'],
-            $context['normality']->isNormal
-        )) {
-            $context['outliers'] = null;
+        if ($context->populationStatus === null) {
+            throw new RuntimeException(
+                'DetectOutliers requires PopulationStatus.'
+            );
+        }
+
+        // Default: no outliers detected / not applicable
+        $context->outliers = null;
+
+        if ($context->normalityResult === null) {
             return $context;
         }
 
-        $values = $context['dataset']->values();
+        if (!ApplicabilityRules::canDetectOutliers(
+            $context->populationStatus,
+            $context->normalityResult->isNormal
+        )) {
+            return $context;
+        }
 
-        $context['outliers'] = [
+        $values = array_map(
+            static fn ($measurement) => $measurement->value(),
+            $context->population->measurements()
+        );
+
+        $context->outliers = [
             'dixon'  => Dixon::compute($values),
             'grubbs' => Grubbs::compute($values),
         ];

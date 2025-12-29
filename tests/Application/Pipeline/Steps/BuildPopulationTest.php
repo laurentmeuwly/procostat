@@ -39,7 +39,10 @@ final class BuildPopulationTest extends TestCase
             unit: 'Bq/kg'
         );
 
-        return new AnalysisContext($dataset);
+        return new AnalysisContext(
+            dataset: $dataset,
+            thresholdStandard: 'iso13528'
+        );
     }
 
     public function test_population_is_built_from_measurements(): void

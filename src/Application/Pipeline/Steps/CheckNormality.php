@@ -2,34 +2,45 @@
 
 namespace Procorad\Procostat\Application\Pipeline\Steps;
 
+use Procorad\Procostat\Application\AnalysisContext;
+use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Contracts\NormalityAdapter;
 use Procorad\Procostat\Domain\Rules\ApplicabilityRules;
 use RuntimeException;
 
-final class CheckNormality
+final class CheckNormality implements PipelineStep
 {
     public function __construct(
         private readonly NormalityAdapter $normalityAdapter
     ) {}
 
-    public function __invoke(array $context): array
+    public function __invoke(AnalysisContext $context): AnalysisContext
     {
-        if (!isset($context['dataset'], $context['populationStatus'])) {
+        if ($context->population === null) {
             throw new RuntimeException(
-                'CheckNormality requires dataset and populationStatus.'
+                'CheckNormality requires an existing Population.'
             );
         }
 
-        $context['normality'] = null;
+        if ($context->populationStatus === null) {
+            throw new RuntimeException(
+                'CheckNormality requires PopulationStatus.'
+            );
+        }
 
-        if (!ApplicabilityRules::canCheckNormality($context['populationStatus'])) {
-            $context['normality'] = null;
+        // Default: no normality result
+        $context->normalityResult = null;
+
+        if (!ApplicabilityRules::canCheckNormality($context->populationStatus)) {
             return $context;
         }
 
-        $values = $context['dataset']->values(); // helper à prévoir
+        $values = array_map(
+            static fn ($measurement) => $measurement->value(),
+            $context->population->measurements()
+        );
 
-        $context['normality'] = $this->normalityAdapter->analyze($values);
+        $context->normalityResult = $this->normalityAdapter->analyze($values);
 
         return $context;
     }

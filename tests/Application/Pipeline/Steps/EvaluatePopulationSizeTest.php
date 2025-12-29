@@ -35,7 +35,8 @@ final class EvaluatePopulationSizeTest extends TestCase
     public function test_population_status_is_computed(): void
     {
         $context = new AnalysisContext(
-            dataset: $this->dummyDataset()
+            dataset: $this->dummyDataset(),
+            thresholdStandard: 'iso13528'
         );
 
         $context->population = $this->populationOfSize(10);
@@ -53,7 +54,8 @@ final class EvaluatePopulationSizeTest extends TestCase
     public function test_population_is_not_exploitable_when_less_than_3(): void
     {
         $context = new AnalysisContext(
-            dataset: $this->dummyDataset()
+            dataset: $this->dummyDataset(),
+            thresholdStandard: 'iso13528'
         );
 
         $context->population = $this->populationOfSize(2);
@@ -72,7 +74,8 @@ final class EvaluatePopulationSizeTest extends TestCase
     public function test_population_is_descriptive_only_between_3_and_6(): void
     {
         $context = new AnalysisContext(
-            dataset: $this->dummyDataset()
+            dataset: $this->dummyDataset(),
+            thresholdStandard: 'iso13528'
         );
 
         $context->population = $this->populationOfSize(5);
@@ -91,7 +94,8 @@ final class EvaluatePopulationSizeTest extends TestCase
     public function test_population_is_fully_exploitable_from_7(): void
     {
         $context = new AnalysisContext(
-            dataset: $this->dummyDataset()
+            dataset: $this->dummyDataset(),
+            thresholdStandard: 'iso13528'
         );
 
         $context->population = $this->populationOfSize(7);
@@ -112,7 +116,8 @@ final class EvaluatePopulationSizeTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $context = new AnalysisContext(
-            dataset: $this->dummyDataset()
+            dataset: $this->dummyDataset(),
+            thresholdStandard: 'iso13528'
         );
 
         (new EvaluatePopulationSize())($context);

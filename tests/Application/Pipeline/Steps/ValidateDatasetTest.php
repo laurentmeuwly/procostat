@@ -33,7 +33,10 @@ final class ValidateDatasetTest extends TestCase
             unit: 'Bq/kg'
         );
 
-        return new AnalysisContext($dataset);
+        return new AnalysisContext(
+            dataset: $dataset,
+            thresholdStandard: 'iso13528'
+        );
     }
 
     private function dummyAssignedValueSpec()

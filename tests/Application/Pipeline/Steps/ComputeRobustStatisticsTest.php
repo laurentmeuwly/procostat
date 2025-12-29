@@ -50,6 +50,7 @@ final class ComputeRobustStatisticsTest extends TestCase
     {
         return new AnalysisContext(
             dataset: $this->dummyDataset(),
+            thresholdStandard: 'iso13528',
             population: $this->population()
         );
     }
@@ -71,7 +72,8 @@ final class ComputeRobustStatisticsTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $context = new AnalysisContext(
-            dataset: $this->dummyDataset()
+            dataset: $this->dummyDataset(),
+            thresholdStandard: 'iso13528'
         );
 
         (new ComputeRobustStatistics())($context);
