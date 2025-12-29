@@ -2,29 +2,25 @@
 
 namespace Procorad\Procostat\Application\Pipeline\Steps;
 
-use RuntimeException;
-use Procorad\Procostat\DTO\AnalysisDataset;
+use Procorad\Procostat\Application\AnalysisContext;
+use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Domain\Measurements\Measurement;
+use Procorad\Procostat\DTO\AnalysisDataset;
+use RuntimeException;
 
-final class ValidateDataset
+final class ValidateDataset implements PipelineStep
 {
-    /**
-     * @param array<string, mixed> $context
-     * @return array<string, mixed>
-     */
-    public function __invoke(array $context): array
+    public function __invoke(AnalysisContext $context): AnalysisContext
     {
-        if (
-            !isset($context['dataset'])
-            || !$context['dataset'] instanceof AnalysisDataset
-        ) {
+        $dataset = $context->dataset;
+
+        if ($dataset->measurements() === []) {
             throw new RuntimeException(
-                'ValidateDataset requires an AnalysisDataset.'
+                'AnalysisDataset must contain at least one measurement.'
             );
         }
 
-        /** @var AnalysisDataset $dataset */
-        $dataset = $context['dataset'];
+        $seenLaboratoryCodes = [];
 
         foreach ($dataset->measurements() as $measurement) {
             if (!$measurement instanceof Measurement) {
@@ -33,23 +29,42 @@ final class ValidateDataset
                 );
             }
 
-            if (trim($measurement->laboratoryCode) === '') {
+            $labCode = trim($measurement->laboratoryCode());
+
+            if ($labCode === '') {
                 throw new RuntimeException(
-                    'Measurement requires laboratoryCode.'
+                    'Measurement requires a non-empty laboratory code.'
                 );
             }
 
-            if (!is_finite($measurement->value)) {
+            if (isset($seenLaboratoryCodes[$labCode])) {
+                throw new RuntimeException(
+                    sprintf('Duplicate laboratory code detected: %s', $labCode)
+                );
+            }
+
+            $seenLaboratoryCodes[$labCode] = true;
+
+            if (!is_finite($measurement->value())) {
                 throw new RuntimeException(
                     'Measurement value must be a finite number.'
                 );
             }
 
-            if ($measurement->uncertainty !== null) {
-                $u = $measurement->uncertainty->standard();
+            if ($measurement->uncertainty() !== null) {
+                $u = $measurement->uncertainty()->standard();
+
                 if ($u < 0) {
                     throw new RuntimeException(
                         'Measurement uncertainty must be non-negative.'
+                    );
+                }
+            }
+
+            if ($measurement->limitOfDetection() !== null) {
+                if ($measurement->limitOfDetection() < 0) {
+                    throw new RuntimeException(
+                        'Limit of detection must be non-negative.'
                     );
                 }
             }
