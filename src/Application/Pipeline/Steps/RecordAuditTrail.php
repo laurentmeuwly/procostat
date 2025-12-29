@@ -2,6 +2,8 @@
 
 namespace Procorad\Procostat\Application\Pipeline\Steps;
 
+use Procorad\Procostat\Application\AnalysisContext;
+use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 use Procorad\Procostat\Contracts\AuditStore;
 use Procorad\Procostat\Domain\Audit\AuditBuilder;
@@ -12,87 +14,60 @@ use RuntimeException;
 final class RecordAuditTrail
 {
     public function __construct(
-        private readonly ThresholdsResolver $thresholdsResolver,
         private readonly AuditStore $auditStore
     ) {
     }
 
-    /**
-     * @param array{
-     *   laboratoryCode: string,
-     *   thresholdStandard: string,
-     *   zScore?: float,
-     *   zPrimeScore?: float,
-     *   labEvaluation: LabEvaluation,
-     *   auditTrail?: AuditTrail
-     * } $context
-     *
-     * @return array{
-     *   laboratoryCode: string,
-     *   thresholdStandard: string,
-     *   zScore?: float,
-     *   zPrimeScore?: float,
-     *   labEvaluation: LabEvaluation,
-     *   auditTrail: AuditTrail
-     * }
-     */
-    public function __invoke(array $context): array
+    public function __invoke(AnalysisContext $context): AnalysisContext
     {
-        if (!isset($context['laboratoryCode'], $context['thresholdStandard'], $context['labEvaluation'])) {
+        if ($context->populationSummary === null) {
             throw new RuntimeException(
-                'RecordAuditTrail requires laboratoryCode, thresholdStandard and labEvaluation.'
+                'RecordAuditTrail requires PopulationSummary.'
             );
         }
 
-        if (!$context['labEvaluation'] instanceof LabEvaluation) {
-            throw new RuntimeException('labEvaluation must be an instance of LabEvaluation.');
-        }
-
-        [$decisionScore, $decisionBasis] = $this->resolveDecisionScore($context);
-
-        // Sanity: the audit must reflect the same basis as the decision
-        if ($context['labEvaluation']->decisionBasis !== $decisionBasis) {
+        if (empty($context->labEvaluations)) {
             throw new RuntimeException(
-                'Decision basis mismatch between labEvaluation and available scores in context.'
+                'RecordAuditTrail requires lab evaluations.'
             );
         }
 
-        $thresholds = $this->thresholdsResolver->resolve($context['thresholdStandard']);
-
-        $trail = $context['auditTrail'] ?? new AuditTrail();
-
-        $event = AuditBuilder::fromDecision(
-            laboratoryCode: $context['laboratoryCode'],
-            status: $context['labEvaluation']->fitnessStatus,
-            decisionBasis: $decisionBasis,
-            decisionScore: $decisionScore,
-            thresholds: $thresholds
+        $thresholds = ThresholdsResolver::resolve(
+            $context->thresholdStandard
         );
 
-        $trail->add($event);
-        $this->auditStore->store($event);
+        $trail = new AuditTrail();
 
-        $context['auditTrail'] = $trail;
+        foreach ($context->labEvaluations as $evaluation) {
+            $decisionScore = $this->decisionScoreFromEvaluation($evaluation);
+
+            $event = AuditBuilder::labDecision(
+                laboratoryCode: $evaluation->laboratoryCode,
+                status: $evaluation->fitnessStatus,
+                decisionBasis: $evaluation->decisionBasis,
+                decisionScore: $decisionScore,
+                thresholds: $thresholds
+            );
+
+            $trail->add($event);
+            $this->auditStore->store($event);
+        }
+
+        $context->auditTrail = $trail;
 
         return $context;
     }
 
-    /**
-     * @param array<string, mixed> $context
-     * @return array{0: float, 1: string}
-     */
-    private function resolveDecisionScore(array $context): array
+    private function decisionScoreFromEvaluation(LabEvaluation $evaluation): float
     {
-        if (isset($context['zPrimeScore'])) {
-            return [$context['zPrimeScore'], 'z_prime'];
-        }
-
-        if (isset($context['zScore'])) {
-            return [$context['zScore'], 'z'];
-        }
-
-        throw new RuntimeException(
-            'No decision score available for audit: zPrimeScore or zScore is required.'
-        );
+        return match ($evaluation->decisionBasis) {
+            'z' => $evaluation->zScore
+                ?? throw new RuntimeException('Audit requires zScore when decisionBasis is "z".'),
+            'z_prime' => $evaluation->zPrimeScore
+                ?? throw new RuntimeException('Audit requires zPrimeScore when decisionBasis is "z_prime".'),
+            default => throw new RuntimeException(
+                "Unknown decisionBasis [{$evaluation->decisionBasis}] in LabEvaluation."
+            ),
+        };
     }
 }
