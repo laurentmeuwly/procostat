@@ -5,8 +5,15 @@ namespace Procorad\Procostat\Application\Pipeline\Steps;
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValue;
 use Procorad\Procostat\Domain\Decision\FitnessDecision;
+use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Performance\IndicatorType;
+use Procorad\Procostat\Domain\Rules\Thresholds;
+use Procorad\Procostat\Domain\Statistics\Performance\ZScore;
+use Procorad\Procostat\Domain\Statistics\Performance\ZPrimeScore;
+use Procorad\Procostat\Domain\Statistics\Performance\ZetaScore;
+use Procorad\Procostat\Domain\Statistics\RobustStatistics;
 use Procorad\Procostat\DTO\LabEvaluation;
 use RuntimeException;
 
@@ -34,7 +41,8 @@ final class EvaluateLaboratories implements PipelineStep
         );
 
         foreach ($context->population->measurements() as $measurement) {
-            $context->labEvaluations[] = $this->evaluateLab(
+            $labCode = (string) $measurement->laboratoryCode();
+            $context->labEvaluations[$labCode] = $this->evaluateLab(
                 $measurement,
                 $context->assignedValue,
                 $context->robustStatistics,
@@ -47,35 +55,53 @@ final class EvaluateLaboratories implements PipelineStep
     }
 
     private function evaluateLab(
-        $measurement,
-        $assignedValue,
-        $robustStats,
+        Measurement $measurement,
+        AssignedValue $assignedValue,
+        RobustStatistics $robustStats,
         IndicatorType $indicatorType,
-        $thresholds
+        Thresholds $thresholds
     ): LabEvaluation {
         $xLab = $measurement->value();
-        $uLab = $measurement->uncertainty()?->standard();
+        $uLab = $measurement->uncertainty()?->toStandard();   // k=1
 
         $xRef = $assignedValue->value();
-        $uRef = $assignedValue->standardUncertainty();
+        $uRef = $assignedValue->standardUncertainty();  // k=1
 
         $z = null;
         $zPrime = null;
         $zeta = null;
 
+        $sigma = $robustStats->stdDev();
+        if ($sigma <= 0.0) {
+            throw new \LogicException('Standard deviation must be strictly positive.');
+        }
+
         if ($indicatorType === IndicatorType::Z) {
-            $z = ($xLab - $xRef) / $robustStats->stdDev();
+            $z = ZScore::compute(
+                result: $xLab,
+                assignedValue: $xRef,
+                sigmaPt: $sigma
+            );
             $decisionScore = $z;
             $decisionBasis = 'z';
         } else {
-            $zPrime = ($xLab - $xRef)
-                / sqrt($robustStats->stdDev() ** 2 + ($uRef ?? 0.0) ** 2);
+            $zPrime = ZPrimeScore::compute(
+                result: $xLab,
+                assignedValue: $xRef,
+                sigmaPt: $sigma,
+                uAssigned: $uRef
+            );
             $decisionScore = $zPrime;
             $decisionBasis = 'z_prime';
         }
 
         if ($uLab !== null && $uRef !== null) {
-            $zeta = ($xLab - $xRef) / sqrt($uLab ** 2 + $uRef ** 2);
+            $zeta = ZetaScore::compute(
+                result: $xLab,
+                assignedValue: $xRef,
+                uResult: $uLab,     // standard uncertainty (k=1)
+                uAssigned: $uRef   // standard uncertainty (k=1)
+            );
         }
 
         $fitnessStatus = FitnessDecision::decideFromScore(
@@ -84,7 +110,7 @@ final class EvaluateLaboratories implements PipelineStep
         );
 
         return new LabEvaluation(
-            laboratoryCode: $measurement->laboratoryCode(),
+            laboratoryCode: (string) $measurement->laboratoryCode(),
             zScore: $z,
             zPrimeScore: $zPrime,
             zetaScore: $zeta,

@@ -24,7 +24,7 @@ final class Measurement
             throw new RuntimeException('Limit of detection must be non-negative.');
         }
 
-        if ($uncertainty !== null && $uncertainty->standard() < 0) {
+        if ($uncertainty !== null && $uncertainty->toStandard() < 0) {
             throw new RuntimeException('Measurement uncertainty must be non-negative.');
         }
     }

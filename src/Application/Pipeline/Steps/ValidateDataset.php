@@ -51,7 +51,7 @@ final class ValidateDataset implements PipelineStep
             }
 
             if ($measurement->uncertainty() !== null) {
-                $u = $measurement->uncertainty()->standard();
+                $u = $measurement->uncertainty()->toStandard();
 
                 if ($u < 0) {
                     throw new RuntimeException(

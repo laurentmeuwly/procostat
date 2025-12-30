@@ -20,10 +20,30 @@ final class Uncertainty
         }
     }
 
+    /** Create a standard uncertainty (u, k=1) */
+    public static function fromStandard(float $u): self
+    {
+        return new self(
+            value: $u,
+            coverageFactor: 1.0,
+            type: 'standard'
+        );
+    }
+
+    /** Create an expanded uncertainty (U, k>1, typically k=2) */
+    public static function fromExpanded(float $U, float $k = 2.0): self
+    {
+        return new self(
+            value: $U,
+            coverageFactor: $k,
+            type: 'expanded'
+        );
+    }
+
     /**
-     * Standard uncertainty (u)
+     * Convert to standard uncertainty (u)
      */
-    public function standard(): float
+    public function toStandard(): float
     {
         return $this->type === 'expanded'
             ? $this->value / $this->coverageFactor
@@ -31,9 +51,9 @@ final class Uncertainty
     }
 
     /**
-     * Expanded uncertainty (U)
+     * Convert to expanded uncertainty (U)
      */
-    public function expanded(): float
+    public function toExpanded(): float
     {
         return $this->type === 'standard'
             ? $this->value * $this->coverageFactor

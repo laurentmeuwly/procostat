@@ -25,14 +25,14 @@ final class ProcostatResult
     ) {
     }
 
-    /** @return LabEvaluation[] */
+    /** @return array<string, LabEvaluation> */
     public function labEvaluations(): array
     {
         return $this->labEvaluations;
     }
 
-    public function labEvaluationFor(int $labCode): ?LabEvaluation
+    public function labEvaluationFor(int|string $labCode): ?LabEvaluation
     {
-        return $this->labEvaluations[$labCode] ?? null;
+        return $this->labEvaluations[(string) $labCode] ?? null;
     }
 }
