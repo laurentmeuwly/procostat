@@ -16,7 +16,7 @@ final class Measurement
             throw new RuntimeException('Measurement requires a non-empty laboratory code.');
         }
 
-        if (!is_finite($value)) {
+        if (! is_finite($value)) {
             throw new RuntimeException('Measurement value must be a finite number.');
         }
 

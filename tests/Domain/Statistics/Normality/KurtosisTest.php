@@ -15,5 +15,4 @@ final class KurtosisTest extends TestCase
 
         $this->assertIsFloat($kurt);
     }
-
 }

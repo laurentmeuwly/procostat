@@ -2,8 +2,8 @@
 
 namespace Procorad\Procostat\Application\Resolvers;
 
-use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use Procorad\Procostat\Domain\Decision\EvaluationValidity;
+use Procorad\Procostat\Domain\Rules\PopulationStatus;
 
 final class EvaluationValidityResolver
 {

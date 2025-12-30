@@ -7,7 +7,7 @@ final class AssignedValueCalculator
     /**
      * Compute assigned value according to ISO 13528
      *
-     * @param float[] $values
+     * @param  float[]  $values
      */
     public static function fromValues(array $values): float
     {

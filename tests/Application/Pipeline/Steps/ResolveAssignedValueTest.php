@@ -9,9 +9,9 @@ use Procorad\Procostat\Domain\AssignedValue\AssignedValue;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
-use Procorad\Procostat\Domain\Population\Population;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
+use Procorad\Procostat\Domain\Population\Population;
 use Procorad\Procostat\Domain\Statistics\RobustStatistics;
 use RuntimeException;
 
@@ -48,7 +48,7 @@ final class ResolveAssignedValueTest extends TestCase
 
     public function test_assigned_value_is_resolved(): void
     {
-        $resolver = new AssignedValueResolver();
+        $resolver = new AssignedValueResolver;
         $step = new ResolveAssignedValue($resolver);
 
         $context = $this->context();
@@ -65,7 +65,7 @@ final class ResolveAssignedValueTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $resolver = new AssignedValueResolver();
+        $resolver = new AssignedValueResolver;
         $step = new ResolveAssignedValue($resolver);
 
         $context = $this->context();
@@ -78,7 +78,7 @@ final class ResolveAssignedValueTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $resolver = new AssignedValueResolver();
+        $resolver = new AssignedValueResolver;
         $step = new ResolveAssignedValue($resolver);
 
         $context = $this->context();

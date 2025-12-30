@@ -3,9 +3,9 @@
 namespace Procorad\Procostat\Tests\Domain;
 
 use PHPUnit\Framework\TestCase;
-use Procorad\Procostat\DTO\LabEvaluation;
 use Procorad\Procostat\Domain\Decision\EvaluationValidity;
 use Procorad\Procostat\Domain\Decision\FitnessStatus;
+use Procorad\Procostat\DTO\LabEvaluation;
 
 final class LabEvaluationTest extends TestCase
 {

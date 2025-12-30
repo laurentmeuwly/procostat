@@ -2,19 +2,18 @@
 
 namespace Procorad\Procostat\Tests\Procostat\Dataset;
 
-use Procorad\Procostat\DTO\AnalysisDataset;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
-use Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification;
-use Procorad\Procostat\Domain\AssignedValue\AssignedValue;
-use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
+use Procorad\Procostat\DTO\AnalysisDataset;
 
 final class Dataset25XGA137Cs
 {
     public static function create(): AnalysisDataset
     {
         $json = json_decode(
-            file_get_contents(__DIR__ . '/fixtures/25XGA_137CS.json'),
+            file_get_contents(__DIR__.'/fixtures/25XGA_137CS.json'),
             true,
             flags: JSON_THROW_ON_ERROR
         );

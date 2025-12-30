@@ -9,7 +9,7 @@ final class Dixon
     /**
      * Dixon Q test (single extreme value)
      *
-     * @param float[] $values
+     * @param  float[]  $values
      * @return array{Q: float, position: 'min'|'max'}
      */
     public static function compute(array $values): array

@@ -31,7 +31,7 @@ final class CheckNormality implements PipelineStep
         // Default: no normality result
         $context->normalityResult = null;
 
-        if (!ApplicabilityRules::canCheckNormality($context->populationStatus)) {
+        if (! ApplicabilityRules::canCheckNormality($context->populationStatus)) {
             return $context;
         }
 

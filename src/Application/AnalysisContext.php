@@ -9,8 +9,8 @@ use Procorad\Procostat\Domain\Population\Population;
 use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use Procorad\Procostat\Domain\Statistics\NormalityResult;
 use Procorad\Procostat\Domain\Statistics\RobustStatistics;
-use Procorad\Procostat\DTO\PopulationSummary;
 use Procorad\Procostat\DTO\AnalysisDataset;
+use Procorad\Procostat\DTO\PopulationSummary;
 
 /**
  * Immutable-at-entry analysis context, progressively enriched
@@ -39,4 +39,5 @@ final class AnalysisContext
 
         public ?AuditTrail $auditTrail = null
     ) {}
+
 }

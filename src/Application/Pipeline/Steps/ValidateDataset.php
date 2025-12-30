@@ -22,7 +22,7 @@ final class ValidateDataset implements PipelineStep
         $seenLaboratoryCodes = [];
 
         foreach ($dataset->measurements() as $measurement) {
-            if (!$measurement instanceof Measurement) {
+            if (! $measurement instanceof Measurement) {
                 throw new RuntimeException(
                     'Invalid measurement in dataset.'
                 );
@@ -44,7 +44,7 @@ final class ValidateDataset implements PipelineStep
 
             $seenLaboratoryCodes[$labCode] = true;
 
-            if (!is_finite($measurement->value())) {
+            if (! is_finite($measurement->value())) {
                 throw new RuntimeException(
                     'Measurement value must be a finite number.'
                 );

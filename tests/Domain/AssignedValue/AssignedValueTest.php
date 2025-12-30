@@ -2,9 +2,9 @@
 
 namespace Procorad\Procostat\Tests\Domain\AssignedValue;
 
+use PHPUnit\Framework\TestCase;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValue;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
-use PHPUnit\Framework\TestCase;
 
 final class AssignedValueTest extends TestCase
 {

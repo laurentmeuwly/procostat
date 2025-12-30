@@ -7,7 +7,7 @@ use RuntimeException;
 final class ShapiroWilk
 {
     /**
-     * @param float[] $values
+     * @param  float[]  $values
      * @return array{W: float, pValue: float}
      */
     public static function test(array $values): array

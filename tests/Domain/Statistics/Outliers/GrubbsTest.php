@@ -19,5 +19,4 @@ final class GrubbsTest extends TestCase
         // G statistic ~ 1.77
         $this->assertEqualsWithDelta(1.77, $result['G'], 0.05);
     }
-
 }

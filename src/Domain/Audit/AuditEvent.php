@@ -25,6 +25,6 @@ final class AuditEvent
         // Metatdata
         public readonly DateTimeImmutable $occurredAt,
         public readonly string $engineVersion
-    ) {
-    }
+    ) {}
+
 }

@@ -11,7 +11,7 @@ final class AssignedValue
         private readonly float $value,
         private readonly ?float $expandedUncertaintyK2
     ) {
-        if (!is_finite($this->value)) {
+        if (! is_finite($this->value)) {
             throw new RuntimeException(
                 'Assigned value must be a finite number.'
             );
@@ -33,7 +33,6 @@ final class AssignedValue
     /**
      * Named constructors
      **/
-
     public static function certified(
         float $value,
         float $expandedUncertaintyK2

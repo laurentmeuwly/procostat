@@ -4,8 +4,8 @@ namespace Procorad\Procostat\Tests\Application\Resolvers;
 
 use PHPUnit\Framework\TestCase;
 use Procorad\Procostat\Application\Resolvers\EvaluationValidityResolver;
-use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use Procorad\Procostat\Domain\Decision\EvaluationValidity;
+use Procorad\Procostat\Domain\Rules\PopulationStatus;
 
 final class EvaluationValidityResolverTest extends TestCase
 {

@@ -3,17 +3,17 @@
 namespace Procorad\Procostat\Infrastructure\Normality;
 
 use Procorad\Procostat\Contracts\NormalityAdapter;
-use Procorad\Procostat\Domain\Statistics\NormalityResult;
+use Procorad\Procostat\Domain\Statistics\Normality\HenryLine;
+use Procorad\Procostat\Domain\Statistics\Normality\Kurtosis;
 use Procorad\Procostat\Domain\Statistics\Normality\ShapiroWilk;
 use Procorad\Procostat\Domain\Statistics\Normality\Skewness;
-use Procorad\Procostat\Domain\Statistics\Normality\Kurtosis;
-use Procorad\Procostat\Domain\Statistics\Normality\HenryLine;
+use Procorad\Procostat\Domain\Statistics\NormalityResult;
 use RuntimeException;
 
 final class PhpNormalityAdapter implements NormalityAdapter
 {
     /**
-     * @param float[] $values
+     * @param  float[]  $values
      */
     public function analyze(array $values): NormalityResult
     {

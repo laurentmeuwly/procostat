@@ -1,4 +1,5 @@
 <?php
+
 namespace Procorad\Procostat\Domain\AssignedValue;
 
 enum AssignedValueType: string

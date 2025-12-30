@@ -15,7 +15,7 @@ final class AssignedValueResolverTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->resolver = new AssignedValueResolver();
+        $this->resolver = new AssignedValueResolver;
     }
 
     public function test_resolves_certified_assigned_value(): void

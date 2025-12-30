@@ -56,7 +56,7 @@ final class DetectOutliersTest extends TestCase
             null
         );
 
-        $result = (new DetectOutliers())($context);
+        $result = (new DetectOutliers)($context);
 
         $this->assertNull($result->outliers);
     }
@@ -77,7 +77,7 @@ final class DetectOutliersTest extends TestCase
             $normality
         );
 
-        $result = (new DetectOutliers())($context);
+        $result = (new DetectOutliers)($context);
 
         $this->assertNull($result->outliers);
     }
@@ -98,7 +98,7 @@ final class DetectOutliersTest extends TestCase
             $normality
         );
 
-        $result = (new DetectOutliers())($context);
+        $result = (new DetectOutliers)($context);
 
         $this->assertIsArray($result->outliers);
         $this->assertArrayHasKey('dixon', $result->outliers);

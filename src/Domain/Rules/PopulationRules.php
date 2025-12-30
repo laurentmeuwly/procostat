@@ -2,8 +2,6 @@
 
 namespace Procorad\Procostat\Domain\Rules;
 
-use Procorad\Procostat\Domain\Rules\PopulationStatus;
-
 final class PopulationRules
 {
     public static function evaluate(int $n): PopulationStatus

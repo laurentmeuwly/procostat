@@ -5,7 +5,7 @@ namespace Procorad\Procostat\Domain\Statistics\Normality;
 final class HenryLine
 {
     /**
-     * @param float[] $values
+     * @param  float[]  $values
      * @return array<array{theoretical: float, observed: float}>
      */
     public static function compute(array $values): array
@@ -64,19 +64,22 @@ final class HenryLine
 
         if ($p < $pLow) {
             $q = sqrt(-2 * log($p));
-            return ((((( $c1*$q + $c2)*$q + $c3)*$q + $c4)*$q + $c5)*$q + $c6)
-                / (((( $d1*$q + $d2)*$q + $d3)*$q + $d4)*$q + 1);
+
+            return ((((($c1 * $q + $c2) * $q + $c3) * $q + $c4) * $q + $c5) * $q + $c6)
+                / (((($d1 * $q + $d2) * $q + $d3) * $q + $d4) * $q + 1);
         }
 
         if ($p <= $pHigh) {
             $q = $p - 0.5;
             $r = $q ** 2;
-            return ((((( $a1*$r + $a2)*$r + $a3)*$r + $a4)*$r + $a5)*$r + $a6)*$q
-                / ((((( $b1*$r + $b2)*$r + $b3)*$r + $b4)*$r + $b5)*$r + 1);
+
+            return ((((($a1 * $r + $a2) * $r + $a3) * $r + $a4) * $r + $a5) * $r + $a6) * $q
+                / ((((($b1 * $r + $b2) * $r + $b3) * $r + $b4) * $r + $b5) * $r + 1);
         }
 
         $q = sqrt(-2 * log(1 - $p));
-        return -((((( $c1*$q + $c2)*$q + $c3)*$q + $c4)*$q + $c5)*$q + $c6)
-            / (((( $d1*$q + $d2)*$q + $d3)*$q + $d4)*$q + 1);
+
+        return -((((($c1 * $q + $c2) * $q + $c3) * $q + $c4) * $q + $c5) * $q + $c6)
+            / (((($d1 * $q + $d2) * $q + $d3) * $q + $d4) * $q + 1);
     }
 }

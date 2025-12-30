@@ -27,12 +27,14 @@ final class DecidePrimaryIndicator implements PipelineStep
         // Population not exploitable -> no performance indicator
         if ($context->populationStatus === PopulationStatus::NOT_EXPLOITABLE) {
             $context->primaryIndicator = null;
+
             return $context;
         }
 
         // Assigned value independent of participants -> Z
         if ($context->assignedValue->isIndependent()) {
             $context->primaryIndicator = IndicatorType::Z;
+
             return $context;
         }
 

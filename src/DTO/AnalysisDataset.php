@@ -12,7 +12,7 @@ final class AnalysisDataset
     private array $measurements;
 
     /**
-     * @param Measurement[] $measurements
+     * @param  Measurement[]  $measurements
      */
     public function __construct(
         array $measurements,
@@ -30,7 +30,7 @@ final class AnalysisDataset
         }
 
         foreach ($measurements as $measurement) {
-            if (!$measurement instanceof Measurement) {
+            if (! $measurement instanceof Measurement) {
                 throw new RuntimeException(
                     'AnalysisDataset expects only Measurement instances.'
                 );

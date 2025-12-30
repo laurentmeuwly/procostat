@@ -10,7 +10,7 @@ final class Population
     private array $measurements;
 
     /**
-     * @param Measurement[] $measurements
+     * @param  Measurement[]  $measurements
      */
     public function __construct(array $measurements)
     {

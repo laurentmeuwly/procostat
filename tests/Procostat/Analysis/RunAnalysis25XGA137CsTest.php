@@ -3,15 +3,15 @@
 namespace Procorad\Procostat\Tests\Procostat\Analysis;
 
 use PHPUnit\Framework\TestCase;
+use Procorad\Procostat\Domain\Decision\FitnessStatus;
+use Procorad\Procostat\Domain\Performance\IndicatorType;
 use Procorad\Procostat\Tests\Procostat\Dataset\Dataset25XGA137Cs;
 use Procorad\Procostat\Tests\Procostat\Oracle\Oracle25XGA137Cs;
 use Procorad\Procostat\Tests\Support\TestAnalysisEngineFactory;
-use Procorad\Procostat\Domain\Performance\IndicatorType;
-use Procorad\Procostat\Domain\Decision\FitnessStatus;
 
 final class RunAnalysis25XGA137CsTest extends TestCase
 {
-    public function test_25XGA_137Cs_matches_oracle(): void
+    public function test_25_xg_a_137_cs_matches_oracle(): void
     {
         $dataset = Dataset25XGA137Cs::create();
 
@@ -51,8 +51,6 @@ final class RunAnalysis25XGA137CsTest extends TestCase
         // Test consistency, not exact value
         self::assertGreaterThan(0.5, $stats->stdDev());
         self::assertLessThan(1.0, $stats->stdDev());
-
-dd($result->labEvaluations());
 
         foreach (Oracle25XGA137Cs::NON_CONFORM_LABS as $labCode) {
             $evaluation = $result->labEvaluationFor($labCode);

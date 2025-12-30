@@ -3,11 +3,11 @@
 namespace Procorad\Procostat\Tests\Application\Pipeline\Steps;
 
 use PHPUnit\Framework\TestCase;
-use Procorad\Procostat\Application\Pipeline\Steps\ValidateDataset;
 use Procorad\Procostat\Application\AnalysisContext;
-use Procorad\Procostat\DTO\AnalysisDataset;
+use Procorad\Procostat\Application\Pipeline\Steps\ValidateDataset;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
+use Procorad\Procostat\DTO\AnalysisDataset;
 use RuntimeException;
 
 final class ValidateDatasetTest extends TestCase
@@ -55,7 +55,7 @@ final class ValidateDatasetTest extends TestCase
             $this->validMeasurement('LAB02', 11.2),
         ]);
 
-        $step = new ValidateDataset();
+        $step = new ValidateDataset;
 
         $result = $step($context);
 
@@ -71,7 +71,7 @@ final class ValidateDatasetTest extends TestCase
 
         $this->expectException(RuntimeException::class);
 
-        (new ValidateDataset())($context);
+        (new ValidateDataset)($context);
     }
 
     public function test_empty_laboratory_code_throws(): void
@@ -82,7 +82,7 @@ final class ValidateDatasetTest extends TestCase
             $this->validMeasurement(' ', 10.0),
         ]);
 
-        (new ValidateDataset())($context);
+        (new ValidateDataset)($context);
     }
 
     public function test_non_finite_value_throws(): void
@@ -93,7 +93,7 @@ final class ValidateDatasetTest extends TestCase
             $this->validMeasurement('LAB01', INF),
         ]);
 
-        (new ValidateDataset())($context);
+        (new ValidateDataset)($context);
     }
 
     public function test_negative_uncertainty_throws(): void
@@ -109,6 +109,6 @@ final class ValidateDatasetTest extends TestCase
 
         $context = $this->validContext([$measurement]);
 
-        (new ValidateDataset())($context);
+        (new ValidateDataset)($context);
     }
 }

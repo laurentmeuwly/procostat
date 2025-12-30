@@ -5,13 +5,13 @@ namespace Procorad\Procostat\Tests\Application\Pipeline\Steps;
 use PHPUnit\Framework\TestCase;
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulationSummary;
-use Procorad\Procostat\Domain\Population\Population;
-use Procorad\Procostat\Domain\Rules\PopulationStatus;
-use Procorad\Procostat\Domain\Statistics\RobustStatistics;
-use Procorad\Procostat\Domain\Statistics\NormalityResult;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValue;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
+use Procorad\Procostat\Domain\Population\Population;
+use Procorad\Procostat\Domain\Rules\PopulationStatus;
+use Procorad\Procostat\Domain\Statistics\NormalityResult;
+use Procorad\Procostat\Domain\Statistics\RobustStatistics;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\PopulationSummary;
 
@@ -55,7 +55,7 @@ final class BuildPopulationSummaryTest extends TestCase
         );
         $context->outliers = [
             'dixon' => ['LAB03'],
-            'grubbs' => []
+            'grubbs' => [],
         ];
 
         return $context;
@@ -65,7 +65,7 @@ final class BuildPopulationSummaryTest extends TestCase
     {
         $context = $this->context();
 
-        $result = (new BuildPopulationSummary())($context);
+        $result = (new BuildPopulationSummary)($context);
 
         $this->assertInstanceOf(
             PopulationSummary::class,

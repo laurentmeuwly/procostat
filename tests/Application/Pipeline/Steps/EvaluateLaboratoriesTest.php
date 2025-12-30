@@ -13,7 +13,6 @@ use Procorad\Procostat\Domain\Measurements\Uncertainty;
 use Procorad\Procostat\Domain\Performance\IndicatorType;
 use Procorad\Procostat\Domain\Population\Population;
 use Procorad\Procostat\Domain\Rules\PopulationStatus;
-use Procorad\Procostat\Domain\Rules\Thresholds;
 use Procorad\Procostat\Domain\Statistics\RobustStatistics;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\LabEvaluation;
@@ -58,7 +57,7 @@ final class EvaluateLaboratoriesTest extends TestCase
         $context = $this->context(IndicatorType::Z_PRIME);
 
         $step = new EvaluateLaboratories(
-            new ThresholdsResolver()
+            new ThresholdsResolver
         );
 
         $result = $step($context);
@@ -87,7 +86,7 @@ final class EvaluateLaboratoriesTest extends TestCase
         $context = $this->context(IndicatorType::Z);
 
         $step = new EvaluateLaboratories(
-            new ThresholdsResolver()
+            new ThresholdsResolver
         );
 
         $result = $step($context);

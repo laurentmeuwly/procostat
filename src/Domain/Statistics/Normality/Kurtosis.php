@@ -9,7 +9,7 @@ final class Kurtosis
     /**
      * Excess kurtosis (normal distribution = 0)
      *
-     * @param float[] $values
+     * @param  float[]  $values
      */
     public static function compute(array $values): float
     {

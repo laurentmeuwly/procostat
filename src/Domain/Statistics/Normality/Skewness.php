@@ -7,7 +7,7 @@ use RuntimeException;
 final class Skewness
 {
     /**
-     * @param float[] $values
+     * @param  float[]  $values
      */
     public static function compute(array $values): float
     {

@@ -15,5 +15,4 @@ final class SkewnessTest extends TestCase
 
         $this->assertEqualsWithDelta(0.0, $skew, 1e-6);
     }
-
 }

@@ -15,5 +15,4 @@ final class HenryLineTest extends TestCase
 
         $this->assertCount(count($values), $points);
     }
-
 }

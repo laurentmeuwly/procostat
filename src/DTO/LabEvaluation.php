@@ -16,8 +16,7 @@ final class LabEvaluation
         public readonly FitnessStatus $fitnessStatus,
         public readonly string $decisionBasis,
         public readonly ?EvaluationValidity $evaluationValidity = null
-    ) {
-    }
+    ) {}
 
     public function withEvaluationValidity(
         EvaluationValidity $validity

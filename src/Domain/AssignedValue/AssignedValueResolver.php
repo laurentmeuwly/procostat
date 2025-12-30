@@ -1,4 +1,5 @@
 <?php
+
 namespace Procorad\Procostat\Domain\AssignedValue;
 
 use Procorad\Procostat\Domain\Statistics\RobustStatisticsInterface;
@@ -11,20 +12,18 @@ final class AssignedValueResolver
         int $populationSize
     ): AssignedValue {
         return match ($spec->type) {
-            AssignedValueType::CERTIFIED =>
-                AssignedValue::certified(
-                    $spec->value,
-                    $spec->expandedUncertaintyK2
-                ),
+            AssignedValueType::CERTIFIED => AssignedValue::certified(
+                $spec->value,
+                $spec->expandedUncertaintyK2
+            ),
 
-            AssignedValueType::ROBUST_MEAN =>
-                AssignedValue::robust(
-                    $stats->mean(),
-                    $this->expandedUncertaintyFromRobustMean(
-                        $stats->stdDev(),
-                        $populationSize
-                    )
-                ),
+            AssignedValueType::ROBUST_MEAN => AssignedValue::robust(
+                $stats->mean(),
+                $this->expandedUncertaintyFromRobustMean(
+                    $stats->stdDev(),
+                    $populationSize
+                )
+            ),
         };
     }
 

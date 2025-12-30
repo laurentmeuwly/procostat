@@ -9,7 +9,7 @@ final class RobustStdDev
     /**
      * ISO 13528 Algorithm A — robust standard deviation
      *
-     * @param float[] $values
+     * @param  float[]  $values
      */
     public static function fromValues(array $values): float
     {

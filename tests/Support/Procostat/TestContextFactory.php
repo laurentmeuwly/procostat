@@ -2,13 +2,13 @@
 
 namespace Procorad\Procostat\Tests\Support\Procostat;
 
-use Procorad\Procostat\Domain\Population\PopulationStatus;
-use Procorad\Procostat\Domain\Statistics\RobustStatistics;
-use Procorad\Procostat\Domain\Reference\ReferenceValues;
 use Procorad\Procostat\Domain\Aptitude\AptitudeStdDev;
 use Procorad\Procostat\Domain\Measurements\Measurement;
-use Procorad\Procostat\DTO\AnalysisDataset;
+use Procorad\Procostat\Domain\Population\PopulationStatus;
+use Procorad\Procostat\Domain\Reference\ReferenceValues;
 use Procorad\Procostat\Domain\Results\LaboratoryResult;
+use Procorad\Procostat\Domain\Statistics\RobustStatistics;
+use Procorad\Procostat\DTO\AnalysisDataset;
 
 /**
  * Factory for building consistent pipeline contexts

@@ -24,7 +24,7 @@ final class BuildPopulationSummary implements PipelineStep
         }
 
         $assignedValue = $context->assignedValue;
-        $robustStats   = $context->robustStatistics;
+        $robustStats = $context->robustStatistics;
 
         $context->populationSummary = new PopulationSummary(
             participantCount: $context->population->count(),

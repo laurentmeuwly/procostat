@@ -5,12 +5,11 @@ namespace Procorad\Procostat\Tests\Application\Pipeline\Steps;
 use PHPUnit\Framework\TestCase;
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\Steps\ComputeRobustStatistics;
-use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
 use Procorad\Procostat\Domain\Population\Population;
-use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use Procorad\Procostat\Domain\Statistics\RobustStatistics;
+use Procorad\Procostat\DTO\AnalysisDataset;
 use RuntimeException;
 
 final class ComputeRobustStatisticsTest extends TestCase
@@ -32,7 +31,7 @@ final class ComputeRobustStatisticsTest extends TestCase
     {
         return new \Procorad\Procostat\DTO\AnalysisDataset(
             measurements: [
-                new Measurement('DUMMY', 1.0, new Uncertainty(0.1))
+                new Measurement('DUMMY', 1.0, new Uncertainty(0.1)),
             ],
             assignedValueSpec: new \Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification(
                 \Procorad\Procostat\Domain\AssignedValue\AssignedValueType::ROBUST_MEAN,
@@ -59,7 +58,7 @@ final class ComputeRobustStatisticsTest extends TestCase
     {
         $context = $this->contextWithPopulation();
 
-        $result = (new ComputeRobustStatistics())($context);
+        $result = (new ComputeRobustStatistics)($context);
 
         $this->assertInstanceOf(
             RobustStatistics::class,
@@ -76,6 +75,6 @@ final class ComputeRobustStatisticsTest extends TestCase
             thresholdStandard: 'iso13528'
         );
 
-        (new ComputeRobustStatistics())($context);
+        (new ComputeRobustStatistics)($context);
     }
 }

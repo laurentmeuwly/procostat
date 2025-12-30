@@ -13,9 +13,9 @@ enum PerformanceStatus: string
         $abs = abs($value);
 
         return match (true) {
-            $abs < 2  => self::CONFORME,
+            $abs < 2 => self::CONFORME,
             $abs <= 3 => self::DISCUTABLE,
-            default   => self::NON_CONFORME,
+            default => self::NON_CONFORME,
         };
     }
 }

@@ -7,11 +7,11 @@ final class IndicatorTypeDecider
     public static function decideZorZPrime(
         IndicatorDecisionContext $ctx
     ): IndicatorType {
-        if (!$ctx->isStable) {
+        if (! $ctx->isStable) {
             return IndicatorType::Z_PRIME;
         }
 
-        if (!$ctx->assignedValueIsIndependent) {
+        if (! $ctx->assignedValueIsIndependent) {
             return IndicatorType::Z_PRIME;
         }
 

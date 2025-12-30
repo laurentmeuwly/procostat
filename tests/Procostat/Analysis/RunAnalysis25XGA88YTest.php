@@ -3,15 +3,14 @@
 namespace Procorad\Procostat\Tests\Procostat\Analysis;
 
 use PHPUnit\Framework\TestCase;
+use Procorad\Procostat\Domain\Decision\FitnessStatus;
 use Procorad\Procostat\Tests\Procostat\Dataset\Dataset25XGA88Y;
 use Procorad\Procostat\Tests\Procostat\Oracle\Oracle25XGA88Y;
 use Procorad\Procostat\Tests\Support\TestAnalysisEngineFactory;
-use Procorad\Procostat\Domain\Performance\IndicatorType;
-use Procorad\Procostat\Domain\Decision\FitnessStatus;
 
 final class RunAnalysis25XGA88YTest extends TestCase
 {
-    public function test_25XGA_88Y_matches_oracle(): void
+    public function test_25_xg_a_88_y_matches_oracle(): void
     {
         $dataset = Dataset25XGA88Y::create();
 
@@ -35,20 +34,6 @@ final class RunAnalysis25XGA88YTest extends TestCase
             $assignedValue->isIndependent()
         );
 
-        /*$this->assertSame(
-            Oracle25XGA88Y::PERFORMANCE_INDICATOR,
-            $result->performanceIndicator()
-        );
-
-        // --- σ aptitude
-        $this->assertEqualsWithDelta(
-            Oracle25XGA88Y::ROBUST_STD_DEV,
-            $result->robustStdDev(),
-            1e-6
-        );*/
-
-        //dd($result->labEvaluations());
-
         foreach (Oracle25XGA88Y::NON_CONFORM_LABS as $labCode) {
             $evaluation = $result->labEvaluationFor($labCode);
 
@@ -58,14 +43,10 @@ final class RunAnalysis25XGA88YTest extends TestCase
                 $evaluation->fitnessStatus,
                 "Lab {$labCode} should be non conform"
             );
-
-            /*$this->assertSame(
-                'non_conform',
-                $evaluation->decision()
-            );*/
         }
 
         foreach (Oracle25XGA88Y::WARNING_LABS as $labCode) {
+            $evaluation = $result->labEvaluationFor($labCode);
 
             self::assertNotNull($evaluation, "Missing evaluation for lab {$labCode}");
             self::assertSame(
@@ -73,11 +54,6 @@ final class RunAnalysis25XGA88YTest extends TestCase
                 $evaluation->fitnessStatus,
                 "Lab {$labCode} should be warning"
             );
-
-            /*$this->assertSame(
-                'warning',
-                $result->labEvaluation($lab)->decision()
-            );*/
         }
     }
 }

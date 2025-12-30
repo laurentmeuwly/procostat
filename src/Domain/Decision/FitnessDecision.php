@@ -11,21 +11,18 @@ final class FitnessDecision
         float $score,
         Thresholds $thresholds
     ): FitnessStatus {
-        if (!is_finite($score)) {
+        if (! is_finite($score)) {
             throw new InvalidArgumentException('Score must be a finite number.');
         }
 
         $abs = abs($score);
 
         return match (true) {
-            $abs < $thresholds->conformityLimit
-                => FitnessStatus::CONFORME,
+            $abs < $thresholds->conformityLimit => FitnessStatus::CONFORME,
 
-            $abs <= $thresholds->discussionLimit
-                => FitnessStatus::DISCUTABLE,
+            $abs <= $thresholds->discussionLimit => FitnessStatus::DISCUTABLE,
 
-            default
-                => FitnessStatus::NON_CONFORME,
+            default => FitnessStatus::NON_CONFORME,
         };
     }
 }

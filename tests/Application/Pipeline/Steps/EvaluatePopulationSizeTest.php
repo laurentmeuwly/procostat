@@ -22,7 +22,7 @@ final class EvaluatePopulationSizeTest extends TestCase
 
         for ($i = 1; $i <= $n; $i++) {
             $measurements[] = new Measurement(
-                laboratoryCode: 'LAB' . $i,
+                laboratoryCode: 'LAB'.$i,
                 value: (float) $i,
                 uncertainty: new Uncertainty(0.5),
                 limitOfDetection: null
@@ -41,7 +41,7 @@ final class EvaluatePopulationSizeTest extends TestCase
 
         $context->population = $this->populationOfSize(10);
 
-        $step = new EvaluatePopulationSize();
+        $step = new EvaluatePopulationSize;
         $result = $step($context);
 
         $this->assertNotNull($result->populationStatus);
@@ -60,7 +60,7 @@ final class EvaluatePopulationSizeTest extends TestCase
 
         $context->population = $this->populationOfSize(2);
 
-        $step = new EvaluatePopulationSize();
+        $step = new EvaluatePopulationSize;
         $result = $step($context);
 
         $this->assertNotNull($result->populationStatus);
@@ -80,7 +80,7 @@ final class EvaluatePopulationSizeTest extends TestCase
 
         $context->population = $this->populationOfSize(5);
 
-        $step = new EvaluatePopulationSize();
+        $step = new EvaluatePopulationSize;
         $result = $step($context);
 
         $this->assertNotNull($result->populationStatus);
@@ -100,7 +100,7 @@ final class EvaluatePopulationSizeTest extends TestCase
 
         $context->population = $this->populationOfSize(7);
 
-        $step = new EvaluatePopulationSize();
+        $step = new EvaluatePopulationSize;
         $result = $step($context);
 
         $this->assertNotNull($result->populationStatus);
@@ -120,7 +120,7 @@ final class EvaluatePopulationSizeTest extends TestCase
             thresholdStandard: 'iso13528'
         );
 
-        (new EvaluatePopulationSize())($context);
+        (new EvaluatePopulationSize)($context);
     }
 
     private function dummyDataset(): \Procorad\Procostat\DTO\AnalysisDataset
@@ -132,7 +132,7 @@ final class EvaluatePopulationSizeTest extends TestCase
                     value: 1.0,
                     uncertainty: new Uncertainty(0.1),
                     limitOfDetection: null
-                )
+                ),
             ],
             assignedValueSpec: new AssignedValueSpecification(
                 AssignedValueType::ROBUST_MEAN,

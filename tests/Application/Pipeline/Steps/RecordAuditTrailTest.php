@@ -3,17 +3,17 @@
 namespace Procorad\Procostat\Tests\Application\Pipeline\Steps;
 
 use PHPUnit\Framework\TestCase;
-use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
 use Procorad\Procostat\Application\AnalysisContext;
+use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
 use Procorad\Procostat\Contracts\AuditStore;
 use Procorad\Procostat\Domain\Audit\AuditTrail;
 use Procorad\Procostat\Domain\Decision\FitnessStatus;
-use Procorad\Procostat\DTO\LabEvaluation;
-use Procorad\Procostat\DTO\AnalysisDataset;
-use Procorad\Procostat\DTO\PopulationSummary;
-use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
+use Procorad\Procostat\Domain\Rules\PopulationStatus;
+use Procorad\Procostat\DTO\AnalysisDataset;
+use Procorad\Procostat\DTO\LabEvaluation;
+use Procorad\Procostat\DTO\PopulationSummary;
 
 final class RecordAuditTrailTest extends TestCase
 {

@@ -40,5 +40,4 @@ final class SignificantFiguresTest extends TestCase
             SignificantFigures::roundToUncertainty(10.1234, 0.045)
         );
     }
-
 }

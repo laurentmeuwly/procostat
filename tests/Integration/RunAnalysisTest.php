@@ -3,19 +3,18 @@
 namespace Procorad\Procostat\Tests\Application;
 
 use PHPUnit\Framework\TestCase;
+use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 use Procorad\Procostat\Application\RunAnalysis;
-use Procorad\Procostat\Contracts\NormalityAdapter;
 use Procorad\Procostat\Contracts\AuditStore;
-use Procorad\Procostat\Domain\Statistics\NormalityResult;
+use Procorad\Procostat\Contracts\NormalityAdapter;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
+use Procorad\Procostat\Domain\Statistics\NormalityResult;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\ProcostatResult;
-use Procorad\Procostat\Domain\Audit\AuditEvent;
-use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
-use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 
 final class RunAnalysisTest extends TestCase
 {
@@ -56,12 +55,12 @@ final class RunAnalysisTest extends TestCase
             ->expects($this->exactly(4))
             ->method('store');
 
-        $assignedValueResolver = new AssignedValueResolver();
-        $thresholdsResolver = new ThresholdsResolver();
+        $assignedValueResolver = new AssignedValueResolver;
+        $thresholdsResolver = new ThresholdsResolver;
 
         $engine = new RunAnalysis(
             normalityAdapter: $normalityAdapter,
-            assignedValueResolver: $assignedValueResolver ,
+            assignedValueResolver: $assignedValueResolver,
             thresholdsResolver: $thresholdsResolver,
             auditStore: $auditStore,
             thresholdStandard: 'iso13528'

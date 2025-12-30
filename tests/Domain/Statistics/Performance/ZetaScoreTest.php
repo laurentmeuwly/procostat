@@ -30,5 +30,4 @@ final class ZetaScoreTest extends TestCase
             uAssigned: 0.0
         );
     }
-
 }

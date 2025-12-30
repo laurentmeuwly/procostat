@@ -2,27 +2,26 @@
 
 namespace Procorad\Procostat\Application;
 
+use Procorad\Procostat\Application\Pipeline\PipelineRunner;
+use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulation;
+use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulationSummary;
+use Procorad\Procostat\Application\Pipeline\Steps\CheckNormality;
+use Procorad\Procostat\Application\Pipeline\Steps\ComputeRobustStatistics;
+use Procorad\Procostat\Application\Pipeline\Steps\DecidePrimaryIndicator;
+use Procorad\Procostat\Application\Pipeline\Steps\DetectOutliers;
+use Procorad\Procostat\Application\Pipeline\Steps\EvaluateLaboratories;
+use Procorad\Procostat\Application\Pipeline\Steps\EvaluatePopulationSize;
+use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
+use Procorad\Procostat\Application\Pipeline\Steps\ResolveAssignedValue;
+use Procorad\Procostat\Application\Pipeline\Steps\ValidateDataset;
+use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 use Procorad\Procostat\Contracts\AnalysisEngine;
-use Procorad\Procostat\Contracts\NormalityAdapter;
 use Procorad\Procostat\Contracts\AuditStore;
+use Procorad\Procostat\Contracts\NormalityAdapter;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\ProcostatResult;
 use Procorad\Procostat\Support\Version;
-use Procorad\Procostat\Application\Pipeline\PipelineRunner;
-use Procorad\Procostat\Application\Pipeline\Steps\ValidateDataset;
-use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulation;
-use Procorad\Procostat\Application\Pipeline\Steps\EvaluatePopulationSize;
-use Procorad\Procostat\Application\Pipeline\Steps\ComputeRobustStatistics;
-use Procorad\Procostat\Application\Pipeline\Steps\ResolveAssignedValue;
-use Procorad\Procostat\Application\Pipeline\Steps\DecidePrimaryIndicator;
-use Procorad\Procostat\Application\Pipeline\Steps\CheckNormality;
-use Procorad\Procostat\Application\Pipeline\Steps\DetectOutliers;
-use Procorad\Procostat\Application\Pipeline\Steps\EvaluateLaboratories;
-use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulationSummary;
-use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
-use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
-use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
-use RuntimeException;
 
 final class RunAnalysis implements AnalysisEngine
 {
@@ -42,16 +41,16 @@ final class RunAnalysis implements AnalysisEngine
         );
 
         $runner = new PipelineRunner([
-            new ValidateDataset(),
-            new BuildPopulation(),
-            new EvaluatePopulationSize(),
-            new ComputeRobustStatistics(),
+            new ValidateDataset,
+            new BuildPopulation,
+            new EvaluatePopulationSize,
+            new ComputeRobustStatistics,
             new ResolveAssignedValue($this->assignedValueResolver),
-            new DecidePrimaryIndicator(),
+            new DecidePrimaryIndicator,
             new CheckNormality($this->normalityAdapter),
-            new DetectOutliers(),
+            new DetectOutliers,
             new EvaluateLaboratories($this->thresholdsResolver),
-            new BuildPopulationSummary(),
+            new BuildPopulationSummary,
             new RecordAuditTrail($this->auditStore),
         ]);
 

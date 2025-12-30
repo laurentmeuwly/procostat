@@ -5,11 +5,11 @@ namespace Procorad\Procostat\Tests\Application\Pipeline\Steps;
 use PHPUnit\Framework\TestCase;
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulation;
-use Procorad\Procostat\DTO\AnalysisDataset;
-use Procorad\Procostat\Domain\Measurements\Measurement;
-use Procorad\Procostat\Domain\Measurements\Uncertainty;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
+use Procorad\Procostat\Domain\Measurements\Measurement;
+use Procorad\Procostat\Domain\Measurements\Uncertainty;
+use Procorad\Procostat\DTO\AnalysisDataset;
 use RuntimeException;
 
 final class BuildPopulationTest extends TestCase
@@ -52,7 +52,7 @@ final class BuildPopulationTest extends TestCase
             $this->validMeasurement('LAB02', 12.5),
         ]);
 
-        $step = new BuildPopulation();
+        $step = new BuildPopulation;
 
         $result = $step($context);
 
@@ -70,6 +70,6 @@ final class BuildPopulationTest extends TestCase
 
         $context = $this->validContext([]);
 
-        (new BuildPopulation())($context);
+        (new BuildPopulation)($context);
     }
 }

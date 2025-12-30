@@ -11,7 +11,7 @@ final class PopulationSummary
         public readonly int $participantCount,
         public readonly PopulationStatus $populationStatus,
 
-         /** Assigned value finally retained for the analysis */
+        /** Assigned value finally retained for the analysis */
         public readonly ?float $assignedValue,
 
         /** Expanded uncertainty (k=2) of the assigned value, if available */
@@ -23,11 +23,10 @@ final class PopulationSummary
         /** Normality diagnostic (if applicable) */
         public readonly ?NormalityResult $normality,
 
-        /** @var array<string,string>|null  code => reason */
+        /** @var array<string,string>|null code => reason */
         public readonly ?array $outliers,
 
         /** @var string[] */
         public readonly array $notes = [],
-    ) {
-    }
+    ) {}
 }

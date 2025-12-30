@@ -32,7 +32,7 @@ final class DetectOutliers implements PipelineStep
             return $context;
         }
 
-        if (!ApplicabilityRules::canDetectOutliers(
+        if (! ApplicabilityRules::canDetectOutliers(
             $context->populationStatus,
             $context->normalityResult->isNormal
         )) {
@@ -45,7 +45,7 @@ final class DetectOutliers implements PipelineStep
         );
 
         $context->outliers = [
-            'dixon'  => Dixon::compute($values),
+            'dixon' => Dixon::compute($values),
             'grubbs' => Grubbs::compute($values),
         ];
 

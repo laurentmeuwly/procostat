@@ -83,6 +83,6 @@ final class SignificantFigures
 
         $magnitude = floor(log10(abs($uncertainty)));
 
-        return max(0, (int)-$magnitude + $figures - 2);
+        return max(0, (int) -$magnitude + $figures - 2);
     }
 }

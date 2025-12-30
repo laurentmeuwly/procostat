@@ -9,7 +9,7 @@ final class Grubbs
     /**
      * Grubbs test (single outlier)
      *
-     * @param float[] $values
+     * @param  float[]  $values
      * @return array{G: float, index: int}
      */
     public static function compute(array $values): array

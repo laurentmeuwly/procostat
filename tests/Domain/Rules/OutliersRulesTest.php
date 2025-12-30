@@ -20,5 +20,4 @@ final class OutliersRulesTest extends TestCase
             OutliersRules::isSuspiciousGrubbs(2.3, 12)
         );
     }
-
 }

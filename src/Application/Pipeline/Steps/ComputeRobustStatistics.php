@@ -4,11 +4,7 @@ namespace Procorad\Procostat\Application\Pipeline\Steps;
 
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\PipelineStep;
-use Procorad\Procostat\DTO\AnalysisDataset;
-use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use Procorad\Procostat\Domain\Statistics\RobustStatisticsCalculator;
-use Procorad\Procostat\Domain\Statistics\Robust\RobustStdDev;
-use Procorad\Procostat\Domain\Rules\ApplicabilityRules;
 use RuntimeException;
 
 final class ComputeRobustStatistics implements PipelineStep

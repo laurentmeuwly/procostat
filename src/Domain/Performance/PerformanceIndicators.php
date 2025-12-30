@@ -20,7 +20,7 @@ final class PerformanceIndicators
     public function declaredValue(): float
     {
         return match ($this->declaredIndicator) {
-            IndicatorType::Z       => $this->z,
+            IndicatorType::Z => $this->z,
             IndicatorType::Z_PRIME => $this->zPrime,
             default => throw new \LogicException('Invalid declared indicator'),
         };

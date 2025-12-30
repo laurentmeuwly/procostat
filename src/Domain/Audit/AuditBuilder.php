@@ -23,7 +23,7 @@ final class AuditBuilder
             normReference: $normReference,
             conformityLimit: null,
             discussionLimit: null,
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
             engineVersion: Version::current()
         );
     }
@@ -44,7 +44,7 @@ final class AuditBuilder
             normReference: $thresholds->normReference,
             conformityLimit: $thresholds->conformityLimit,
             discussionLimit: $thresholds->discussionLimit,
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
             engineVersion: Version::current()
         );
     }

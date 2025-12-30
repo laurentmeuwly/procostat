@@ -61,7 +61,7 @@ final class DecidePrimaryIndicatorTest extends TestCase
             $assignedValue
         );
 
-        $result = (new DecidePrimaryIndicator())($context);
+        $result = (new DecidePrimaryIndicator)($context);
 
         $this->assertNull($result->primaryIndicator);
     }
@@ -78,7 +78,7 @@ final class DecidePrimaryIndicatorTest extends TestCase
             $assignedValue
         );
 
-        $result = (new DecidePrimaryIndicator())($context);
+        $result = (new DecidePrimaryIndicator)($context);
 
         $this->assertSame(
             IndicatorType::Z,
@@ -98,7 +98,7 @@ final class DecidePrimaryIndicatorTest extends TestCase
             $assignedValue
         );
 
-        $result = (new DecidePrimaryIndicator())($context);
+        $result = (new DecidePrimaryIndicator)($context);
 
         $this->assertSame(
             IndicatorType::Z_PRIME,

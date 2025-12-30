@@ -2,8 +2,6 @@
 
 namespace Procorad\Procostat\Domain\Statistics;
 
-use Procorad\Procostat\Domain\Statistics\RobustStatisticsInterface;
-
 final class RobustStatistics implements RobustStatisticsInterface
 {
     public function __construct(

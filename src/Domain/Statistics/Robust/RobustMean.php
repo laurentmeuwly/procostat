@@ -9,7 +9,7 @@ final class RobustMean
     /**
      * ISO 13528 Algorithm A — robust mean
      *
-     * @param float[] $values
+     * @param  float[]  $values
      */
     public static function fromValues(array $values): float
     {
@@ -49,7 +49,7 @@ final class RobustMean
     }
 
     /**
-     * @param float[] $values
+     * @param  float[]  $values
      */
     private static function median(array $values): float
     {
@@ -64,11 +64,12 @@ final class RobustMean
     /**
      * Initial robust scale estimate (ISO 13528)
      *
-     * @param float[] $values
+     * @param  float[]  $values
      */
     private static function initialScale(array $values): float
     {
         $n = count($values);
+
         return 1.483 * (
             abs($values[intdiv($n * 3, 4)] - $values[intdiv($n, 4)])
         );
@@ -77,6 +78,7 @@ final class RobustMean
     public static function initialScaleForStdDev(array $values): float
     {
         $n = count($values);
+
         return 1.483 * (
             abs($values[intdiv($n * 3, 4)] - $values[intdiv($n, 4)])
         );

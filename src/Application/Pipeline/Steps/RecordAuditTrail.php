@@ -15,8 +15,7 @@ final class RecordAuditTrail implements PipelineStep
 {
     public function __construct(
         private readonly AuditStore $auditStore
-    ) {
-    }
+    ) {}
 
     public function __invoke(AnalysisContext $context): AnalysisContext
     {
@@ -36,7 +35,7 @@ final class RecordAuditTrail implements PipelineStep
             $context->thresholdStandard
         );
 
-        $trail = new AuditTrail();
+        $trail = new AuditTrail;
 
         foreach ($context->labEvaluations as $evaluation) {
             $decisionScore = $this->decisionScoreFromEvaluation($evaluation);
