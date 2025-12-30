@@ -3,7 +3,6 @@
 namespace Procorad\Procostat\Tests\Procostat\Analysis;
 
 use PHPUnit\Framework\TestCase;
-use Procorad\Procostat\Application\RunAnalysis;
 use Procorad\Procostat\Tests\Procostat\Dataset\Dataset25XGA137Cs;
 use Procorad\Procostat\Tests\Procostat\Oracle\Oracle25XGA137Cs;
 use Procorad\Procostat\Tests\Support\TestAnalysisEngineFactory;
