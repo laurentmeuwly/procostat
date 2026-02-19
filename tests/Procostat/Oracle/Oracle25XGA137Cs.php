@@ -14,7 +14,7 @@ final class Oracle25XGA137Cs
 
     public const PERFORMANCE_INDICATOR = 'z_score';
 
-    // Note: Lab 41 is classified as WARNING in official report
+    // Note: Lab 14 is classified as WARNING in official report
     // but exceeds |z| > 3 with ISO thresholds → NON_CONFORM in engine
     public const NON_CONFORM_LABS = [41, 56, 72];
 

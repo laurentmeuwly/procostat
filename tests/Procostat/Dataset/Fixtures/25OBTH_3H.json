@@ -1,0 +1,27 @@
+{
+  "campaign": 2025,
+  "eil": "OBT Wheat",
+  "sample_code": "25OBTH",
+  "radionuclide": "3H",
+  "unit": "Bq/kg",
+  "assigned_value": {
+    "type": "certified_value",
+    "value": 19.942,
+    "expanded_uncertainty_k2": 5.114336
+  },
+  "measurements": [
+    { "lab_code": 56, "value": 10.63, "uncertainty_k2": 1.29, "lod": null },
+    { "lab_code": 39, "value": 13.83, "uncertainty_k2": 0.98, "lod": null },
+    { "lab_code": 51, "value": 14.90, "uncertainty_k2": 3.40, "lod": null },
+    { "lab_code": 73, "value": 15.11, "uncertainty_k2": 1.33, "lod": null },
+    { "lab_code": 75, "value": 16.54, "uncertainty_k2": 0.83, "lod": null },
+    { "lab_code": 63, "value": 17.00, "uncertainty_k2": 4.60, "lod": null },
+    { "lab_code": 82, "value": 17.63, "uncertainty_k2": 2.26, "lod": null },
+    { "lab_code": 29, "value": 19.90, "uncertainty_k2": 3.80, "lod": null },
+    { "lab_code": 3,  "value": 21.90, "uncertainty_k2": 10.90, "lod": null },
+    { "lab_code": 69, "value": 22.50, "uncertainty_k2": 3.30, "lod": null },
+    { "lab_code": 67, "value": 27.30, "uncertainty_k2": 5.10, "lod": null },
+    { "lab_code": 52, "value": 34.70, "uncertainty_k2": 3.47, "lod": null },
+    { "lab_code": 6,  "value": 62.00, "uncertainty_k2": 27.00, "lod": null }
+  ]
+}
