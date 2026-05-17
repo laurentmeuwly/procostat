@@ -23,20 +23,11 @@ final class BuildPopulationSummary implements PipelineStep
             );
         }
 
-        $assignedValue = $context->assignedValue;
-        $robustStats = $context->robustStatistics;
-
         $context->populationSummary = new PopulationSummary(
             participantCount: $context->population->count(),
             populationStatus: $context->populationStatus,
-
-            assignedValue: $assignedValue?->value(),
-            assignedUncertainty: $assignedValue?->expandedUncertaintyK2(),
-            populationStdDev: $robustStats?->stdDev(),
-
             normality: $context->normalityResult,
             outliers: $context->outliers,
-
             notes: []
         );
 

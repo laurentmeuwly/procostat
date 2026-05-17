@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulationSummary;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValue;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
 use Procorad\Procostat\Domain\Population\Population;
@@ -25,8 +27,8 @@ final class BuildPopulationSummaryTest extends TestCase
                 new Measurement('LAB02', 11.0, new Uncertainty(0.5)),
                 new Measurement('LAB03', 12.0, new Uncertainty(0.5)),
             ],
-            assignedValueSpec: new \Procorad\Procostat\Domain\AssignedValue\AssignedValueSpecification(
-                \Procorad\Procostat\Domain\AssignedValue\AssignedValueType::ROBUST_MEAN,
+            assignedValueSpec: new AssignedValueSpecification(
+                AssignedValueType::ROBUST_MEAN,
                 null,
                 null
             ),
@@ -41,11 +43,11 @@ final class BuildPopulationSummaryTest extends TestCase
             thresholdStandard: 'iso13528'
         );
 
-        $context->population = new Population($dataset->measurements());
+        $context->population       = new Population($dataset->measurements());
         $context->populationStatus = PopulationStatus::FULL_EVALUATION;
         $context->robustStatistics = new RobustStatistics(11.0, 1.0);
-        $context->assignedValue = AssignedValue::robust(11.0);
-        $context->normalityResult = new NormalityResult(
+        $context->assignedValue    = AssignedValue::robust(11.0);
+        $context->normalityResult  = new NormalityResult(
             isNormal: true,
             shapiroWilkPValue: 0.12,
             skewness: 0.01,
@@ -54,37 +56,62 @@ final class BuildPopulationSummaryTest extends TestCase
             henryLine: null
         );
         $context->outliers = [
-            'dixon' => ['LAB03'],
+            'dixon'  => ['LAB03'],
             'grubbs' => [],
         ];
 
         return $context;
     }
 
-    public function test_population_summary_is_built(): void
+    public function test_population_summary_contains_decisional_state(): void
     {
-        $context = $this->context();
-
-        $result = (new BuildPopulationSummary)($context);
-
-        $this->assertInstanceOf(
-            PopulationSummary::class,
-            $result->populationSummary
-        );
-
+        $result  = (new BuildPopulationSummary)($this->context());
         $summary = $result->populationSummary;
 
+        $this->assertInstanceOf(PopulationSummary::class, $summary);
         $this->assertSame(3, $summary->participantCount);
-        $this->assertSame(
-            PopulationStatus::FULL_EVALUATION,
-            $summary->populationStatus
-        );
-
-        $this->assertSame(11.0, $summary->assignedValue);
-        $this->assertNull($summary->assignedUncertainty);
-        $this->assertSame(1.0, $summary->populationStdDev);
-
+        $this->assertSame(PopulationStatus::FULL_EVALUATION, $summary->populationStatus);
         $this->assertNotNull($summary->normality);
         $this->assertIsArray($summary->outliers);
+    }
+
+    public function test_population_summary_does_not_duplicate_assigned_value(): void
+    {
+        // assignedValue appartient à ProcostatResult->assignedValue, pas au summary
+        $summary = (new BuildPopulationSummary)($this->context())->populationSummary;
+
+        $this->assertFalse(
+            property_exists($summary, 'assignedValue'),
+            'PopulationSummary ne doit pas dupliquer la valeur assignée'
+        );
+        $this->assertFalse(
+            property_exists($summary, 'populationStdDev'),
+            'PopulationSummary ne doit pas dupliquer la stddev robuste'
+        );
+    }
+
+    public function test_helpers_reflect_population_status(): void
+    {
+        $summary = (new BuildPopulationSummary)($this->context())->populationSummary;
+
+        $this->assertTrue($summary->isExploitable());
+        $this->assertTrue($summary->isFullyExploitable());
+        $this->assertTrue($summary->normalityAccepted());
+    }
+
+    public function test_normality_null_when_not_applicable(): void
+    {
+        $context = $this->context();
+        $context->populationStatus = PopulationStatus::DESCRIPTIVE_ONLY;
+        $context->normalityResult  = null;
+        $context->outliers         = null;
+
+        $summary = (new BuildPopulationSummary)($context)->populationSummary;
+
+        $this->assertNull($summary->normality);
+        $this->assertNull($summary->outliers);
+        $this->assertFalse($summary->normalityAccepted());
+        $this->assertTrue($summary->isExploitable());
+        $this->assertFalse($summary->isFullyExploitable());
     }
 }

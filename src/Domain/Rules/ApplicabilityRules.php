@@ -19,6 +19,6 @@ final class ApplicabilityRules
     public static function canComputeRobustStatistics(
         PopulationStatus $population
     ): bool {
-        return $population->isExploitable();
+        return $population->isFullyExploitable();
     }
 }

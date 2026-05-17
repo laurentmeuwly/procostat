@@ -10,7 +10,7 @@ final class Version
      * Must be updated with each release
      * that has a scientific or normative impact.
      */
-    private const VERSION = '1.0.0-dev';
+    private const VERSION = '1.1.0';
 
     public static function current(): string
     {

@@ -8,6 +8,7 @@ use Procorad\Procostat\Application\Pipeline\Steps\ComputeRobustStatistics;
 use Procorad\Procostat\Domain\Measurements\Measurement;
 use Procorad\Procostat\Domain\Measurements\Uncertainty;
 use Procorad\Procostat\Domain\Population\Population;
+use Procorad\Procostat\Domain\Rules\PopulationStatus;
 use Procorad\Procostat\Domain\Statistics\RobustStatistics;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use RuntimeException;
@@ -45,25 +46,42 @@ final class ComputeRobustStatisticsTest extends TestCase
         );
     }
 
-    private function contextWithPopulation(): AnalysisContext
-    {
-        return new AnalysisContext(
+    private function contextWithPopulation(
+        PopulationStatus $status = PopulationStatus::FULL_EVALUATION
+    ): AnalysisContext {
+        $context = new AnalysisContext(
             dataset: $this->dummyDataset(),
             thresholdStandard: 'iso13528',
             population: $this->population()
         );
+        $context->populationStatus = $status;
+
+        return $context;
     }
 
     public function test_robust_statistics_are_computed(): void
     {
-        $context = $this->contextWithPopulation();
+        $result = (new ComputeRobustStatistics)($this->contextWithPopulation());
 
-        $result = (new ComputeRobustStatistics)($context);
+        $this->assertInstanceOf(RobustStatistics::class, $result->robustStatistics);
+    }
 
-        $this->assertInstanceOf(
-            RobustStatistics::class,
-            $result->robustStatistics
+    public function test_null_for_descriptive_only(): void
+    {
+        $result = (new ComputeRobustStatistics)(
+            $this->contextWithPopulation(PopulationStatus::DESCRIPTIVE_ONLY)
         );
+
+        $this->assertNull($result->robustStatistics);
+    }
+
+    public function test_null_for_not_exploitable(): void
+    {
+        $result = (new ComputeRobustStatistics)(
+            $this->contextWithPopulation(PopulationStatus::NOT_EXPLOITABLE)
+        );
+
+        $this->assertNull($result->robustStatistics);
     }
 
     public function test_missing_population_throws_exception(): void
@@ -73,6 +91,20 @@ final class ComputeRobustStatisticsTest extends TestCase
         $context = new AnalysisContext(
             dataset: $this->dummyDataset(),
             thresholdStandard: 'iso13528'
+        );
+
+        (new ComputeRobustStatistics)($context);
+    }
+
+    public function test_missing_population_status_throws_exception(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        $context = new AnalysisContext(
+            dataset: $this->dummyDataset(),
+            thresholdStandard: 'iso13528',
+            population: $this->population()
+            // populationStatus intentionnellement absent
         );
 
         (new ComputeRobustStatistics)($context);

@@ -43,9 +43,6 @@ final class RecordAuditTrailTest extends TestCase
         $context->populationSummary = new PopulationSummary(
             participantCount: 2,
             populationStatus: PopulationStatus::FULL_EVALUATION,
-            assignedValue: 10.5,
-            assignedUncertainty: null,
-            populationStdDev: 1.0,
             normality: null,
             outliers: null
         );

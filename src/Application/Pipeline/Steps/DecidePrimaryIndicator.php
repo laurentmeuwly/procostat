@@ -28,18 +28,35 @@ final class DecidePrimaryIndicator implements PipelineStep
         if ($context->populationStatus === PopulationStatus::NOT_EXPLOITABLE) {
             $context->primaryIndicator = null;
 
+            // Trace
+            $context->trace->primaryIndicator      = null;
+            $context->trace->isCertifiedReference  = false;
+            // End trace
+
             return $context;
         }
 
-        // Assigned value independent of participants -> Z
         if ($context->assignedValue->isIndependent()) {
+            // Assigned value independent of participants -> Z
             $context->primaryIndicator = IndicatorType::Z;
 
-            return $context;
-        }
+            // Trace
+            $context->trace->isCertifiedReference = true;
+            $context->trace->primaryIndicator     = 'z';
+            $context->trace->addStep('zscore');
+            // End trace
 
-        // Assigned value derived from participants -> Z'
-        $context->primaryIndicator = IndicatorType::Z_PRIME;
+        } else {
+            // Assigned value derived from participants -> Z'
+            $context->primaryIndicator = IndicatorType::Z_PRIME;
+
+            // Trace
+            $context->trace->isCertifiedReference = false;
+            $context->trace->primaryIndicator     = 'z_prime';
+            $context->trace->addStep('zprime');
+            // End trace
+
+        }
 
         return $context;
     }

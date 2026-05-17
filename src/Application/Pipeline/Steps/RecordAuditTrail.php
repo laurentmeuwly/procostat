@@ -25,17 +25,16 @@ final class RecordAuditTrail implements PipelineStep
             );
         }
 
-        if (empty($context->labEvaluations)) {
-            throw new RuntimeException(
-                'RecordAuditTrail requires lab evaluations.'
-            );
-        }
+        $trail = new AuditTrail;
 
+        // descriptive_only or not_exploitable -> no lab evaluation, audit empty
+        if (empty($context->labEvaluations)) {
+            $context->auditTrail = $trail;
+            return $context;
+        }
         $thresholds = ThresholdsResolver::resolve(
             $context->thresholdStandard
         );
-
-        $trail = new AuditTrail;
 
         foreach ($context->labEvaluations as $evaluation) {
             $decisionScore = $this->decisionScoreFromEvaluation($evaluation);
@@ -60,13 +59,15 @@ final class RecordAuditTrail implements PipelineStep
     private function decisionScoreFromEvaluation(LabEvaluation $evaluation): float
     {
         return match ($evaluation->decisionBasis) {
-            'z' => $evaluation->zScore
-                ?? throw new RuntimeException('Audit requires zScore when decisionBasis is "z".'),
+            'z'       => $evaluation->zScore
+                        ?? throw new RuntimeException('Audit requires zScore when decisionBasis is "z".'),
             'z_prime' => $evaluation->zPrimeScore
-                ?? throw new RuntimeException('Audit requires zPrimeScore when decisionBasis is "z_prime".'),
-            default => throw new RuntimeException(
-                "Unknown decisionBasis [{$evaluation->decisionBasis}] in LabEvaluation."
-            ),
+                        ?? throw new RuntimeException('Audit requires zPrimeScore when decisionBasis is "z_prime".'),
+            'zeta'    => $evaluation->zetaScore
+                        ?? throw new RuntimeException('Audit requires zetaScore when decisionBasis is "zeta".'),
+            default   => throw new RuntimeException(
+                            "Unknown decisionBasis [{$evaluation->decisionBasis}] in LabEvaluation."
+                        ),
         };
     }
 }

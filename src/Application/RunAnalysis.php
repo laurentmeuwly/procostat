@@ -3,6 +3,8 @@
 namespace Procorad\Procostat\Application;
 
 use Procorad\Procostat\Application\Pipeline\PipelineRunner;
+use Procorad\Procostat\Application\Pipeline\Steps\BuildDescriptiveStatistics;
+use Procorad\Procostat\Application\Pipeline\Steps\BuildEvaluationReference;
 use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulation;
 use Procorad\Procostat\Application\Pipeline\Steps\BuildPopulationSummary;
 use Procorad\Procostat\Application\Pipeline\Steps\CheckNormality;
@@ -19,7 +21,9 @@ use Procorad\Procostat\Contracts\AnalysisEngine;
 use Procorad\Procostat\Contracts\AuditStore;
 use Procorad\Procostat\Contracts\NormalityAdapter;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
+use Procorad\Procostat\Domain\Trace\AnalysisTrace;
 use Procorad\Procostat\DTO\AnalysisDataset;
+use Procorad\Procostat\DTO\AnalysisOutput;
 use Procorad\Procostat\DTO\ProcostatResult;
 use Procorad\Procostat\Support\Version;
 
@@ -33,7 +37,27 @@ final class RunAnalysis implements AnalysisEngine
         private readonly string $thresholdStandard // injected via config
     ) {}
 
+    /**
+     * API publique principale
+     */
     public function analyze(AnalysisDataset $dataset): ProcostatResult
+    {
+        return $this->run($dataset)->result;
+    }
+
+    /**
+     * API de validation scientifique — retourne résultat + trace.
+     *
+     * Usage test :
+     *   $output = $engine->analyzeWithTrace($dataset);
+     *   expect($output->trace->workflowPath)->toEqual([...]);
+     */
+    public function analyzeWithTrace(AnalysisDataset $dataset): AnalysisOutput
+    {
+        return $this->run($dataset);
+    }
+
+    private function run(AnalysisDataset $dataset): AnalysisOutput
     {
         $context = new AnalysisContext(
             dataset: $dataset,
@@ -43,12 +67,14 @@ final class RunAnalysis implements AnalysisEngine
         $runner = new PipelineRunner([
             new ValidateDataset,
             new BuildPopulation,
+            new BuildDescriptiveStatistics,
             new EvaluatePopulationSize,
             new ComputeRobustStatistics,
             new ResolveAssignedValue($this->assignedValueResolver),
             new DecidePrimaryIndicator,
             new CheckNormality($this->normalityAdapter),
             new DetectOutliers,
+            new BuildEvaluationReference,
             new EvaluateLaboratories($this->thresholdsResolver),
             new BuildPopulationSummary,
             new RecordAuditTrail($this->auditStore),
@@ -56,11 +82,17 @@ final class RunAnalysis implements AnalysisEngine
 
         $finalContext = $runner->run($context);
 
+        // Integrity guards
+        // descriptiveStatistics : always required
+        if ($finalContext->descriptiveStatistics === null) {
+            throw new \RuntimeException(
+                'RunAnalysis pipeline did not produce DescriptiveStatistics.'
+            );
+        }
+
         if (
             $finalContext->assignedValue === null ||
-            $finalContext->robustStatistics === null ||
             $finalContext->populationSummary === null ||
-            $finalContext->primaryIndicator === null ||
             $finalContext->auditTrail === null
         ) {
             throw new \RuntimeException(
@@ -68,14 +100,20 @@ final class RunAnalysis implements AnalysisEngine
             );
         }
 
-        return new ProcostatResult(
+        $result = new ProcostatResult(
             assignedValue: $finalContext->assignedValue,
-            robustStatistics: $finalContext->robustStatistics,
+            descriptiveStatistics: $finalContext->descriptiveStatistics,
+            robustStatistics: $finalContext->robustStatistics,      // nullable
             populationSummary: $finalContext->populationSummary,
-            primaryIndicator: $finalContext->primaryIndicator,
+            primaryIndicator: $finalContext->primaryIndicator,      // nullable
             labEvaluations: $finalContext->labEvaluations,
             auditTrail: $finalContext->auditTrail,
             engineVersion: Version::current()
+        );
+
+        return new AnalysisOutput(
+            result: $result,
+            trace: $finalContext->trace
         );
     }
 }

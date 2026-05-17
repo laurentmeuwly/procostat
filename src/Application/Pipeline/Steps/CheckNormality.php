@@ -31,7 +31,13 @@ final class CheckNormality implements PipelineStep
         // Default: no normality result
         $context->normalityResult = null;
 
-        if (! ApplicabilityRules::canCheckNormality($context->populationStatus)) {
+        $applicable = ApplicabilityRules::canCheckNormality($context->populationStatus);
+
+        // Trace
+        $context->trace->normalityTestApplicable = $applicable;
+        // End trace
+
+        if (! $applicable) {
             return $context;
         }
 
@@ -41,6 +47,12 @@ final class CheckNormality implements PipelineStep
         );
 
         $context->normalityResult = $this->normalityAdapter->analyze($values);
+
+        // Trace
+        $context->trace->shapiroWilkPValue = $context->normalityResult->shapiroWilkPValue;
+        $context->trace->normalityAccepted = $context->normalityResult->isNormal;
+        $context->trace->addStep('normality_check');
+        // End trace
 
         return $context;
     }

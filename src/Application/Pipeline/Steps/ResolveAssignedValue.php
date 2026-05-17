@@ -5,6 +5,7 @@ namespace Procorad\Procostat\Application\Pipeline\Steps;
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
 use RuntimeException;
 
 final class ResolveAssignedValue implements PipelineStep
@@ -21,14 +22,17 @@ final class ResolveAssignedValue implements PipelineStep
             );
         }
 
-        if ($context->robustStatistics === null) {
+        $spec = $context->dataset->assignedValueSpec;
+
+        // RobustStatistics are required only if the assigned value depends on them
+        if ($spec->type === AssignedValueType::ROBUST_MEAN && $context->robustStatistics === null) {
             throw new RuntimeException(
-                'ResolveAssignedValue requires existing RobustStatistics.'
+                'ResolveAssignedValue requires RobustStatistics for ROBUST_MEAN assigned value.'
             );
         }
 
         $context->assignedValue = $this->resolver->resolve(
-            $context->dataset->assignedValueSpec,
+            $spec,
             $context->robustStatistics,
             $context->population->count()
         );

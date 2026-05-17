@@ -8,7 +8,7 @@ final class AssignedValueResolver
 {
     public function resolve(
         AssignedValueSpecification $spec,
-        RobustStatisticsInterface $stats,
+        ?RobustStatisticsInterface $stats,
         int $populationSize
     ): AssignedValue {
         return match ($spec->type) {
