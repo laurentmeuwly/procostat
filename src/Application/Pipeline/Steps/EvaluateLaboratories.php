@@ -75,23 +75,19 @@ final class EvaluateLaboratories implements PipelineStep
         $zPrime = null;
         $zeta   = null;
 
-        // ── Calcul des scores selon la branche ────────────────────────────────
+        // Calcul des scores selon la branche
 
-        if ($ref->decisionBasis === IndicatorType::Z) {
-            if ($ref->sigma === null || $ref->sigma <= 0.0) {
-                throw new \LogicException(
-                    'EvaluationReference.sigma must be strictly positive for Z score.'
-                );
-            }
+        // Toujours calculer z brut si sigma disponible (full_evaluation)
+        // même si ce n'est pas le score de décision
+        if ($ref->sigma !== null && $ref->sigma > 0.0) {
             $z = ZScore::compute(
                 result:        $xLab,
                 assignedValue: $ref->centralValue,
                 sigmaPt:       $ref->sigma
             );
-            $decisionScore = $z;
-            $decisionBasis = IndicatorType::Z->value;
+        }
 
-        } elseif ($ref->decisionBasis === IndicatorType::Z_PRIME) {
+        if ($ref->decisionBasis === IndicatorType::Z_PRIME) {
             if ($ref->sigma === null || $ref->sigma <= 0.0) {
                 throw new \LogicException(
                     'EvaluationReference.sigma must be strictly positive for Z\' score.'
@@ -105,6 +101,10 @@ final class EvaluateLaboratories implements PipelineStep
             );
             $decisionScore = $zPrime;
             $decisionBasis = IndicatorType::Z_PRIME->value;
+
+        } elseif ($ref->decisionBasis === IndicatorType::Z) {
+            $decisionScore = $z;
+            $decisionBasis = IndicatorType::Z->value;
 
         } else {
             // IndicatorType::ZETA → descriptive_only

@@ -21,6 +21,7 @@ use Procorad\Procostat\Contracts\AnalysisEngine;
 use Procorad\Procostat\Contracts\AuditStore;
 use Procorad\Procostat\Contracts\NormalityAdapter;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
+use Procorad\Procostat\Domain\Rules\PopulationThresholds;
 use Procorad\Procostat\Domain\Trace\AnalysisTrace;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\AnalysisOutput;
@@ -29,13 +30,17 @@ use Procorad\Procostat\Support\Version;
 
 final class RunAnalysis implements AnalysisEngine
 {
+    public PopulationThresholds $populationThresholds;
+
     public function __construct(
         private readonly NormalityAdapter $normalityAdapter,
         private readonly AuditStore $auditStore,
         private readonly AssignedValueResolver $assignedValueResolver,
         private readonly ThresholdsResolver $thresholdsResolver,
         private readonly string $thresholdStandard // injected via config
-    ) {}
+    ) {
+        $this->populationThresholds = new PopulationThresholds();
+    }
 
     /**
      * API publique principale
@@ -57,6 +62,13 @@ final class RunAnalysis implements AnalysisEngine
         return $this->run($dataset);
     }
 
+    public function withPopulationThresholds(PopulationThresholds $thresholds): static
+    {
+        $clone = clone $this;
+        $clone->populationThresholds = $thresholds;
+        return $clone;
+    }
+
     private function run(AnalysisDataset $dataset): AnalysisOutput
     {
         $context = new AnalysisContext(
@@ -68,7 +80,7 @@ final class RunAnalysis implements AnalysisEngine
             new ValidateDataset,
             new BuildPopulation,
             new BuildDescriptiveStatistics,
-            new EvaluatePopulationSize,
+            new EvaluatePopulationSize($this->populationThresholds),
             new ComputeRobustStatistics,
             new ResolveAssignedValue($this->assignedValueResolver),
             new DecidePrimaryIndicator,

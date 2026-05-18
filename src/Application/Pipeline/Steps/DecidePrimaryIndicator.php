@@ -36,6 +36,18 @@ final class DecidePrimaryIndicator implements PipelineStep
             return $context;
         }
 
+        if ($context->populationStatus === PopulationStatus::DESCRIPTIVE_ONLY) {
+            $context->primaryIndicator = IndicatorType::ZETA;
+
+            // Trace
+            $context->trace->isCertifiedReference = false;
+            $context->trace->primaryIndicator     = 'zeta';
+            $context->trace->addStep('zeta');
+            // End trace
+
+            return $context;
+        }
+
         if ($context->assignedValue->isIndependent()) {
             // Assigned value independent of participants -> Z
             $context->primaryIndicator = IndicatorType::Z;

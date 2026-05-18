@@ -6,10 +6,15 @@ use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Domain\Rules\PopulationRules;
 use Procorad\Procostat\Domain\Rules\PopulationStatus;
+use Procorad\Procostat\Domain\Rules\PopulationThresholds;
 use RuntimeException;
 
 final class EvaluatePopulationSize implements PipelineStep
 {
+    public function __construct(
+        private readonly PopulationThresholds $thresholds = new PopulationThresholds(),
+    ) {}
+
     public function __invoke(AnalysisContext $context): AnalysisContext
     {
         if ($context->population === null) {
@@ -19,8 +24,7 @@ final class EvaluatePopulationSize implements PipelineStep
         }
 
         $n = $context->population->count();
-
-        $context->populationStatus = PopulationRules::evaluate($n);
+        $context->populationStatus = PopulationRules::evaluate($n, $this->thresholds);
 
         // Trace
         $context->trace->participantCount  = $n;

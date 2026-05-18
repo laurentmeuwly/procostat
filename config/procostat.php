@@ -26,9 +26,9 @@ return [
 
     'population' => [
 
-        'minimum_exploitable' => 3,
+        'min_exploitable' => 3,
 
-        'minimum_full_evaluation' => 7,
+        'min_full_evaluation' => 7,
     ],
 
     /*

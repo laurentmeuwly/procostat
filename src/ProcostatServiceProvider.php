@@ -9,6 +9,7 @@ use Procorad\Procostat\Contracts\AnalysisEngine;
 use Procorad\Procostat\Contracts\AuditStore;
 use Procorad\Procostat\Contracts\NormalityAdapter;
 use Procorad\Procostat\Domain\AssignedValue\AssignedValueResolver;
+use Procorad\Procostat\Domain\Rules\PopulationThresholds;
 use Procorad\Procostat\Infrastructure\Audit\NullAuditStore;
 use RuntimeException;
 
@@ -40,12 +41,19 @@ final class ProcostatServiceProvider extends ServiceProvider
 
         // RunAnalysis (use case)
         $this->app->singleton(AnalysisEngine::class, function ($app) {
-            return new RunAnalysis(
+            $engine = new RunAnalysis(
                 normalityAdapter: $app->make(NormalityAdapter::class),
                 auditStore: $app->make(AuditStore::class),
                 assignedValueResolver: $app->make(AssignedValueResolver::class),
                 thresholdsResolver: $app->make(ThresholdsResolver::class),
                 thresholdStandard: config('procostat.threshold_standard')
+            );
+
+            return $engine->withPopulationThresholds(
+                new PopulationThresholds(
+                    minExploitable:    config('procostat.population.min_exploitable', 3),
+                    minFullEvaluation: config('procostat.population.min_full_evaluation', 7),
+                )
             );
         });
 
