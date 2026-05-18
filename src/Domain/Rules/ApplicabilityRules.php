@@ -21,4 +21,9 @@ final class ApplicabilityRules
     ): bool {
         return $population->isFullyExploitable();
     }
+
+    public static function canApplyDixon(int $n): bool
+    {
+        return $n >= 3 && $n <= 25;
+    }
 }

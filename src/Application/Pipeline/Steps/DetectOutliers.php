@@ -55,8 +55,12 @@ final class DetectOutliers implements PipelineStep
             $context->population->measurements()
         );
 
+        $n = count($values);
+
+        // Dixon : applicable uniquement pour 3 ≤ n ≤ 25 (limite de sa table de critiques)
+        // Grubbs : pas de limite supérieure
         $grubbsResult = Grubbs::compute($values);
-        $dixonResult  = Dixon::compute($values);
+        $dixonResult  = ($n >= 3 && $n <= 25) ? Dixon::compute($values) : null;
 
         $context->outliers = [
             'dixon'  => $dixonResult,
@@ -72,9 +76,11 @@ final class DetectOutliers implements PipelineStep
         // End trace Grubbs
 
         // Trace Dixon
-        $context->trace->dixonTriggered  = true;
-        $context->trace->dixonStatistic  = $dixonResult['Q'] ?? null;
-        $context->trace->addStep('dixon');
+        if ($dixonResult !== null) {
+            $context->trace->dixonTriggered  = true;
+            $context->trace->dixonStatistic  = $dixonResult['Q'] ?? null;
+            $context->trace->addStep('dixon');
+        }
         // End Trace Dixon
 
         return $context;
