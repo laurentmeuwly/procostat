@@ -48,8 +48,32 @@ final class DecidePrimaryIndicator implements PipelineStep
             return $context;
         }
 
-        if ($context->assignedValue->isIndependent()) {
-            // Assigned value independent of participants -> Z
+        // ── PROCORAD workflow override ────────────────────────────────────────
+        //
+        // ISO 13528 strict : valeur certifiée (indépendante) → Z
+        //                    valeur consensus (participants)  → Z'
+        //
+        // PROCORAD : toujours Z', quelle que soit la source de la valeur assignée.
+        // Raison : le client intègre systématiquement l'incertitude du labo (u_lab)
+        // dans le score de performance, même pour les valeurs certifiées.
+        //
+        // Configurable dans procostat.php → 'workflow.force_z_prime'
+        // Mettre à false pour revenir au comportement ISO 13528 strict.
+        //
+        $forceZPrime = config('procostat.workflow.force_z_prime', false);
+
+        if ($forceZPrime || ! $context->assignedValue->isIndependent()) {
+            // Z' — valeur consensus OU override PROCORAD
+            $context->primaryIndicator = IndicatorType::Z_PRIME;
+
+            // Trace
+            $context->trace->isCertifiedReference = $context->assignedValue->isIndependent();
+            $context->trace->primaryIndicator     = 'z_prime';
+            $context->trace->addStep('zprime');
+            // End trace
+
+        } else {
+            // Z — valeur certifiée, comportement ISO 13528 strict
             $context->primaryIndicator = IndicatorType::Z;
 
             // Trace
@@ -57,17 +81,6 @@ final class DecidePrimaryIndicator implements PipelineStep
             $context->trace->primaryIndicator     = 'z';
             $context->trace->addStep('zscore');
             // End trace
-
-        } else {
-            // Assigned value derived from participants -> Z'
-            $context->primaryIndicator = IndicatorType::Z_PRIME;
-
-            // Trace
-            $context->trace->isCertifiedReference = false;
-            $context->trace->primaryIndicator     = 'z_prime';
-            $context->trace->addStep('zprime');
-            // End trace
-
         }
 
         return $context;

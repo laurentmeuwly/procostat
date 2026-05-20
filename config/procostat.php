@@ -41,6 +41,13 @@ return [
 
         // z > 5 => truncation
         'truncation_z_threshold' => 5.0,
+
+        // PROCORAD override : toujours Z' comme indicateur primaire,
+        // même si la valeur assignée est certifiée (indépendante).
+        // ISO 13528 strict utiliserait Z dans ce cas.
+        // Mettre à false pour revenir au comportement ISO 13528.
+        'force_z_prime' => true,
+
     ],
 
     /*
