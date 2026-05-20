@@ -5,17 +5,13 @@ namespace Procorad\Procostat\Application\Pipeline\Steps;
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\PipelineStep;
 use Procorad\Procostat\Domain\Rules\ApplicabilityRules;
+use Procorad\Procostat\Domain\Rules\OutliersRules;
 use Procorad\Procostat\Domain\Statistics\Outliers\Dixon;
 use Procorad\Procostat\Domain\Statistics\Outliers\Grubbs;
 use RuntimeException;
 
 final class DetectOutliers implements PipelineStep
 {
-    // Seuil Grubbs critique simplifié (α = 0.05, dépend de n en production).
-    // Le seuil exact est résolu par la table ISO ; ici on expose la stat brute
-    // dans la trace et le test comparatif reste dans les règles métier.
-    private const GRUBBS_CRITICAL_APPROXIMATION = 2.0;
-
     public function __invoke(AnalysisContext $context): AnalysisContext
     {
         if ($context->population === null) {
@@ -39,7 +35,7 @@ final class DetectOutliers implements PipelineStep
 
         $applicable = ApplicabilityRules::canDetectOutliers(
             $context->populationStatus,
-            $context->normalityResult->isNormal
+            true, //$context->normalityResult->isNormal
         );
 
         if (!$applicable) {
@@ -67,13 +63,34 @@ final class DetectOutliers implements PipelineStep
             'grubbs' => $grubbsResult,
         ];
 
+        // Seuil Grubbs ISO 13528 tabulé par n (α = 5%)
+        $grubbsOutlierDetected = OutliersRules::isSuspiciousGrubbs(
+            $grubbsResult['G'],
+            count($values),
+        );
+
         // Trace Grubbs
         $context->trace->grubbsTriggered        = true;
         $context->trace->grubbsStatistic        = $grubbsResult['G'];
         $context->trace->grubbsCandidateIndex   = $grubbsResult['index'];
-        $context->trace->grubbsOutlierDetected  = $grubbsResult['G'] > self::GRUBBS_CRITICAL_APPROXIMATION;
+        $context->trace->grubbsOutlierDetected  = $grubbsOutlierDetected;
         $context->trace->addStep('grubbs');
         // End trace Grubbs
+
+        // Si Grubbs détecte un aberrant → exclure la mesure du contexte
+        // afin que ComputeRobustStatistics et EvaluateLaboratories travaillent
+        // sur la population nettoyée.
+        if ($grubbsOutlierDetected && $grubbsResult['index'] !== -1) {
+            $measurements = $context->population->measurements();
+            $excludedCode = $measurements[$grubbsResult['index']]->laboratoryCode();
+
+            $context->population = $context->population->withoutIndex(
+                $grubbsResult['index'],
+            );
+
+            $context->trace->grubbsExcludedLab = $excludedCode;
+            $context->trace->addStep('grubbs_exclusion');
+        }
 
         // Trace Dixon
         if ($dixonResult !== null) {

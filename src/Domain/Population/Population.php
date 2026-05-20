@@ -42,4 +42,51 @@ final class Population
             $this->measurements
         );
     }
+
+    /**
+     * Retourne une nouvelle Population sans la mesure à l'index donné.
+     * Utilisé par DetectOutliers pour exclure un aberrant Grubbs.
+     *
+     * @throws \RuntimeException si la population résultante devait être vide
+     */
+    public function withoutIndex(int $index): self
+    {
+        $filtered = array_values(
+            array_filter(
+                $this->measurements,
+                fn ($_, $i) => $i !== $index,
+                ARRAY_FILTER_USE_BOTH,
+            )
+        );
+
+        if ($filtered === []) {
+            throw new \RuntimeException(
+                'Cannot exclude the only measurement from Population.'
+            );
+        }
+
+        return new self($filtered);
+    }
+
+    /**
+     * Retourne une nouvelle Population sans la mesure identifiée par son code labo.
+     */
+    public function withoutLaboratory(string $laboratoryCode): self
+    {
+        $filtered = array_values(
+            array_filter(
+                $this->measurements,
+                fn (Measurement $m) => $m->laboratoryCode() !== $laboratoryCode,
+            )
+        );
+
+        if ($filtered === []) {
+            throw new \RuntimeException(
+                "Cannot exclude laboratory '{$laboratoryCode}': would leave Population empty."
+            );
+        }
+
+        return new self($filtered);
+    }
+
 }

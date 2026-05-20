@@ -93,6 +93,12 @@ final class AnalysisTrace
     public bool $grubbsOutlierDetected = false;
 
     /**
+     * Code laboratoire exclu par Grubbs (null si aucun aberrant détecté).
+     * Alimenté par DetectOutliers après exclusion de la population.
+     */
+    public ?string $grubbsExcludedLab = null;
+
+    /**
      * Test de Dixon déclenché.
      */
     public bool $dixonTriggered = false;
