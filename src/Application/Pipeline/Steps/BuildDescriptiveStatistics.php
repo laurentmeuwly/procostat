@@ -28,8 +28,11 @@ final class BuildDescriptiveStatistics implements PipelineStep
             );
         }
 
+        // La population originale (avant Grubbs) est stockée dans le contexte
+        // pour que trimmedCount reflète l'exclusion effectuée par DetectOutliers.
         $context->descriptiveStatistics = DescriptiveStatisticsCalculator::compute(
-            $context->population
+            population:        $context->population,
+            trimmedPopulation: $context->originalPopulation,
         );
 
         return $context;

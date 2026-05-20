@@ -79,10 +79,10 @@ final class RunAnalysis implements AnalysisEngine
         $runner = new PipelineRunner([
             new ValidateDataset,
             new BuildPopulation,
-            new BuildDescriptiveStatistics,
             new EvaluatePopulationSize($this->populationThresholds),
             new CheckNormality($this->normalityAdapter),
             new DetectOutliers,
+            new BuildDescriptiveStatistics,
             new ComputeRobustStatistics,
             new ResolveAssignedValue($this->assignedValueResolver),
             new DecidePrimaryIndicator,

@@ -84,6 +84,9 @@ final class DetectOutliers implements PipelineStep
             $measurements = $context->population->measurements();
             $excludedCode = $measurements[$grubbsResult['index']]->laboratoryCode();
 
+            // Snapshot avant exclusion
+            $context->originalPopulation = $context->population;
+
             $context->population = $context->population->withoutIndex(
                 $grubbsResult['index'],
             );

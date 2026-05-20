@@ -35,6 +35,7 @@ final class AnalysisContext
         public AnalysisTrace $trace = new AnalysisTrace(),
 
         public ?Population $population = null,
+        public ?Population $originalPopulation = null,  // avant exclusion des aberrants (Grubbs)
         public ?PopulationStatus $populationStatus = null,
 
         public ?DescriptiveStatistics $descriptiveStatistics = null,
