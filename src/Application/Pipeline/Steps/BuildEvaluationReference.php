@@ -85,11 +85,19 @@ final class BuildEvaluationReference implements PipelineStep
 
         // Pour descriptive_only : pas de sigma d'aptitude (pas de z ni z'),
         // uniquement le zeta basé sur les incertitudes individuelles.
-        // uRef = null car la moyenne arithmétique n'a pas d'incertitude certifiée.
+        //
+        // uRef = u(arith) = U(arith) / 2  où  U(arith) = 2 × s / √p
+        // Simplifié : uRef = s / √p  (k=1)
+        $n    = $context->population?->count() ?? 1;
+        $s    = $descriptive->standardDeviation;
+        $uRef = ($s !== null && $n > 1)
+            ? $s / sqrt($n)   // u(arith) k=1 = s / √p
+            : null;
+
         return new EvaluationReference(
             centralValue:    $descriptive->mean,
             sigma:           null,
-            uRef:            null,
+            uRef:            $uRef,
             decisionBasis:   IndicatorType::ZETA,
             referenceSource: ReferenceSource::ArithmeticMean,
         );
