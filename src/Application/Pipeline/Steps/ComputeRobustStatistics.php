@@ -81,13 +81,28 @@ final class ComputeRobustStatistics implements PipelineStep
                     $context->trace->truncationTriggered = true;
                     $context->trace->addStep('truncation');
 
-                    // Identifier les laboratoires tronqués
-                    $measurements = $context->population->measurements();
+                    // Identifier les laboratoires dont z > 5 et les exclure
+                    $measurements    = $context->population->measurements();
+                    $truncatedCodes  = [];
+
                     foreach ($measurements as $i => $measurement) {
                         if ($zScores[$i] > self::TRUNCATION_THRESHOLD) {
+                            $truncatedCodes[] = (string) $measurement->laboratoryCode();
                             $context->trace->truncatedLabs[] = (string) $measurement->laboratoryCode();
                         }
                     }
+
+                    // Recalculer x* et s* sur la population tronquée
+                    // C'est la population qui alimente EvaluateLaboratories ensuite
+                    $truncatedPopulation = $context->population;
+                    foreach ($truncatedCodes as $code) {
+                        $truncatedPopulation = $truncatedPopulation->withoutLaboratory($code);
+                    }
+
+                    $context->population       = $truncatedPopulation;
+                    $context->robustStatistics = RobustStatisticsCalculator::compute($truncatedPopulation);
+
+                    $context->trace->addStep('truncation_recompute');
                 }
             }
         }
