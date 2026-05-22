@@ -12,21 +12,23 @@ use RuntimeException;
 
 final class DetectOutliers implements PipelineStep
 {
+    /**
+     * Seuil Procorad : Grubbs uniquement si n < 12.
+     * Au-delà, la population est suffisamment grande pour que
+     * les stats robustes absorbent les valeurs extrêmes sans exclusion.
+     */
+    private const GRUBBS_MAX_N = 12;
+
     public function __invoke(AnalysisContext $context): AnalysisContext
     {
         if ($context->population === null) {
-            throw new RuntimeException(
-                'DetectOutliers requires an existing Population.'
-            );
+            throw new RuntimeException('DetectOutliers requires an existing Population.');
         }
 
         if ($context->populationStatus === null) {
-            throw new RuntimeException(
-                'DetectOutliers requires PopulationStatus.'
-            );
+            throw new RuntimeException('DetectOutliers requires PopulationStatus.');
         }
 
-        // Default: no outliers detected / not applicable
         $context->outliers = null;
 
         if ($context->normalityResult === null) {
@@ -35,13 +37,12 @@ final class DetectOutliers implements PipelineStep
 
         $applicable = ApplicabilityRules::canDetectOutliers(
             $context->populationStatus,
-            true, //$context->normalityResult->isNormal
+            true,
         );
 
-        if (!$applicable) {
-            // Distribution non-normale -> exclusion avant robuste
+        if (! $applicable) {
             if (! $context->normalityResult->isNormal) {
-                $context->trace->excludedBeforeRobust = []; // peuplé par step dédiée si existante
+                $context->trace->excludedBeforeRobust = [];
             }
             return $context;
         }
@@ -53,55 +54,61 @@ final class DetectOutliers implements PipelineStep
 
         $n = count($values);
 
-        // Dixon : applicable uniquement pour 3 ≤ n ≤ 25 (limite de sa table de critiques)
-        // Grubbs : pas de limite supérieure
-        $grubbsResult = Grubbs::compute($values);
-        $dixonResult  = ($n >= 3 && $n <= 25) ? Dixon::compute($values) : null;
+        // ── Grubbs : Procorad n < 12 uniquement ───────────────────────────
+        $grubbsResult = ($n < self::GRUBBS_MAX_N)
+            ? Grubbs::compute($values)
+            : null;
+
+        // ── Dixon : 3 ≤ n ≤ 25 (limite de sa table de critiques) ──────────
+        $dixonResult = ($n >= 3 && $n <= 25)
+            ? Dixon::compute($values)
+            : null;
 
         $context->outliers = [
-            'dixon'  => $dixonResult,
             'grubbs' => $grubbsResult,
+            'dixon'  => $dixonResult,
         ];
 
-        // Seuil Grubbs ISO 13528 tabulé par n (α = 5%)
-        $grubbsOutlierDetected = OutliersRules::isSuspiciousGrubbs(
-            $grubbsResult['G'],
-            count($values),
-        );
-
-        // Trace Grubbs
-        $context->trace->grubbsTriggered        = true;
-        $context->trace->grubbsStatistic        = $grubbsResult['G'];
-        $context->trace->grubbsCandidateIndex   = $grubbsResult['index'];
-        $context->trace->grubbsOutlierDetected  = $grubbsOutlierDetected;
-        $context->trace->addStep('grubbs');
-        // End trace Grubbs
-
-        // Si Grubbs détecte un aberrant → exclure la mesure du contexte
-        // afin que ComputeRobustStatistics et EvaluateLaboratories travaillent
-        // sur la population nettoyée.
-        if ($grubbsOutlierDetected && $grubbsResult['index'] !== -1) {
-            $measurements = $context->population->measurements();
-            $excludedCode = $measurements[$grubbsResult['index']]->laboratoryCode();
-
-            // Snapshot avant exclusion
-            $context->originalPopulation = $context->population;
-
-            $context->population = $context->population->withoutIndex(
-                $grubbsResult['index'],
+        // ── Traitement Grubbs ──────────────────────────────────────────────
+        if ($grubbsResult !== null) {
+            $grubbsOutlierDetected = OutliersRules::isSuspiciousGrubbs(
+                $grubbsResult['G'],
+                $n,
             );
 
-            $context->trace->grubbsExcludedLab = $excludedCode;
-            $context->trace->addStep('grubbs_exclusion');
+            $context->trace->grubbsTriggered       = true;
+            $context->trace->grubbsStatistic       = $grubbsResult['G'];
+            $context->trace->grubbsCandidateIndex  = $grubbsResult['index'];
+            $context->trace->grubbsOutlierDetected = $grubbsOutlierDetected;
+            $context->trace->addStep('grubbs');
+
+            // Aberrant confirmé et index valide → exclure de la population
+            if ($grubbsOutlierDetected && $grubbsResult['index'] !== -1) {
+                $measurements = $context->population->measurements();
+                $index        = $grubbsResult['index'];
+
+                if (! isset($measurements[$index])) {
+                    throw new RuntimeException(
+                        "Grubbs: index {$index} hors limites (population size: {$n})."
+                    );
+                }
+
+                $excludedCode = $measurements[$index]->laboratoryCode();
+
+                $context->originalPopulation = $context->population;
+                $context->population         = $context->population->withoutIndex($index);
+
+                $context->trace->grubbsExcludedLab = $excludedCode;
+                $context->trace->addStep('grubbs_exclusion');
+            }
         }
 
-        // Trace Dixon
+        // ── Traitement Dixon ───────────────────────────────────────────────
         if ($dixonResult !== null) {
-            $context->trace->dixonTriggered  = true;
-            $context->trace->dixonStatistic  = $dixonResult['Q'] ?? null;
+            $context->trace->dixonTriggered = true;
+            $context->trace->dixonStatistic = $dixonResult['Q'] ?? null;
             $context->trace->addStep('dixon');
         }
-        // End Trace Dixon
 
         return $context;
     }
