@@ -18,7 +18,7 @@ final class FitnessDecision
         $abs = abs($score);
 
         return match (true) {
-            $abs < $thresholds->conformityLimit => FitnessStatus::CONFORME,
+            $abs <= $thresholds->conformityLimit => FitnessStatus::CONFORME,
 
             $abs <= $thresholds->discussionLimit => FitnessStatus::DISCUTABLE,
 

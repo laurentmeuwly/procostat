@@ -82,9 +82,13 @@ final class DescriptiveStatisticsCalculator
     }
 
     /**
-     * MAD = median(|x_i - median(x)|).
+     * MADe = 1.483 * median(|x_i - median(x)|)
      *
-     * @param float[] $sorted valeurs déjà triées
+     * Le facteur 1.483 rend le MAD coherent avec l'ecart-type
+     * pour une distribution normale (estimateur robuste de sigma).
+     * Reference : plan statistique PROCORAD 2026, paragraphe 9.1.
+     *
+     * @param float[] $sorted valeurs deja triees
      */
     private static function mad(array $sorted): float
     {
@@ -97,6 +101,6 @@ final class DescriptiveStatisticsCalculator
 
         sort($deviations);
 
-        return self::median($deviations);
+        return 1.483 * self::median($deviations);
     }
 }

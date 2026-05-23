@@ -147,6 +147,33 @@ final class AnalysisTrace
      */
     public array $truncatedLabs = [];
 
+    // ── Validation de la valeur certifiée (§9.2.2) ──────────────────────────
+
+    /**
+     * Écart |Xref - X*| calculé lors de la validation (null si non applicable).
+     */
+    public ?float $certifiedValueValidationGap = null;
+
+    /**
+     * Seuil 2 * sqrt[ u2(ref) + (1.25 * s_star / sqrt(p))^2 ] (null si non applicable).
+     */
+    public ?float $certifiedValueValidationThreshold = null;
+
+    /**
+     * Vrai si |Xref - X*| <= seuil -> valeur certifiée retenue.
+     * Faux -> substitution automatique par la moyenne robuste ET
+     *         expertValidationRequired = true.
+     * Null si le step de validation n'a pas été exécuté.
+     */
+    public ?bool $certifiedValueValidated = null;
+
+    /**
+     * Vrai si la valeur certifiée n'a pas passé le critère §9.2.2 et que
+     * l'expert doit intervenir pour valider ou infirmer la substitution.
+     * L'UI doit afficher le bouton [Validation par l'expert] en rouge.
+     */
+    public bool $expertValidationRequired = false;
+
     // ── Indicateur de performance ────────────────────────────────────────────
 
     /**

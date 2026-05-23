@@ -63,7 +63,26 @@ final class ProcostatResult
         public readonly array $labEvaluations,
 
         public readonly AuditTrail $auditTrail,
-        public readonly string $engineVersion
+        public readonly string $engineVersion,
+
+        /**
+         * Vrai si la valeur certifiée n'a pas passé le critère §9.2.2
+         * et que l'expert doit valider la substitution par la moyenne robuste.
+         *
+         * L'UI doit afficher le bouton [Validation par l'expert] en rouge
+         * dans l'en-tête, sous le bouton Calculer.
+         */
+        public readonly bool $expertValidationRequired = false,
+
+        /**
+         * Écart |Xref - X*| calculé (null si critère non applicable).
+         */
+        public readonly ?float $certifiedValueValidationGap = null,
+
+        /**
+         * Seuil 2 * sqrt[ u2(ref) + (1.25 * s_star / sqrt(p))^2 ] (null si non applicable).
+         */
+        public readonly ?float $certifiedValueValidationThreshold = null,
     ) {}
 
     /** @return array<string, LabEvaluation> */

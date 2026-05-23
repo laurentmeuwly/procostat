@@ -15,6 +15,7 @@ use Procorad\Procostat\Application\Pipeline\Steps\EvaluateLaboratories;
 use Procorad\Procostat\Application\Pipeline\Steps\EvaluatePopulationSize;
 use Procorad\Procostat\Application\Pipeline\Steps\RecordAuditTrail;
 use Procorad\Procostat\Application\Pipeline\Steps\ResolveAssignedValue;
+use Procorad\Procostat\Application\Pipeline\Steps\ValidateCertifiedValue;
 use Procorad\Procostat\Application\Pipeline\Steps\ValidateDataset;
 use Procorad\Procostat\Application\Resolvers\ThresholdsResolver;
 use Procorad\Procostat\Contracts\AnalysisEngine;
@@ -39,7 +40,9 @@ final class RunAnalysis implements AnalysisEngine
         private readonly ThresholdsResolver $thresholdsResolver,
         private readonly string $thresholdStandard // injected via config
     ) {
-        $this->populationThresholds = new PopulationThresholds();
+        // PROCORAD utilise minFullEvaluation = 12 (plan statistique §3 et logigramme §11)
+        // ISO 13528 strict utiliserait 7 — configurable via withPopulationThresholds().
+        $this->populationThresholds = PopulationThresholds::procorad()
     }
 
     /**
@@ -85,6 +88,7 @@ final class RunAnalysis implements AnalysisEngine
             new BuildDescriptiveStatistics,
             new ComputeRobustStatistics,
             new ResolveAssignedValue($this->assignedValueResolver),
+            new ValidateCertifiedValue,
             new DecidePrimaryIndicator,
             new BuildEvaluationReference,
             new EvaluateLaboratories($this->thresholdsResolver),
@@ -132,7 +136,10 @@ final class RunAnalysis implements AnalysisEngine
             primaryIndicator: $finalContext->primaryIndicator,      // nullable
             labEvaluations: $finalContext->labEvaluations,
             auditTrail: $finalContext->auditTrail,
-            engineVersion: Version::current()
+            engineVersion: Version::current(),
+            expertValidationRequired:          $finalContext->trace->expertValidationRequired,
+            certifiedValueValidationGap:       $finalContext->trace->certifiedValueValidationGap,
+            certifiedValueValidationThreshold: $finalContext->trace->certifiedValueValidationThreshold,
         );
 
         return new AnalysisOutput(

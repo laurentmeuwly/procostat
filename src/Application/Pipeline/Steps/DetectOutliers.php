@@ -13,7 +13,7 @@ use RuntimeException;
 final class DetectOutliers implements PipelineStep
 {
     /**
-     * Seuil Procorad : Grubbs uniquement si n < 12.
+     * Seuil Procorad : Grubbs uniquement si n <= 12.
      * Au-delà, la population est suffisamment grande pour que
      * les stats robustes absorbent les valeurs extrêmes sans exclusion.
      */
@@ -54,8 +54,8 @@ final class DetectOutliers implements PipelineStep
 
         $n = count($values);
 
-        // ── Grubbs : Procorad n < 12 uniquement ───────────────────────────
-        $grubbsResult = ($n < self::GRUBBS_MAX_N)
+        // ── Grubbs : Procorad n <= 12 uniquement ───────────────────────────
+        $grubbsResult = ($n <= self::GRUBBS_MAX_N)
             ? Grubbs::compute($values)
             : null;
 
