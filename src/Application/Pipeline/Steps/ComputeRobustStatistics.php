@@ -85,6 +85,11 @@ final class ComputeRobustStatistics implements PipelineStep
                     $context->trace->robustMeanBeforeTruncation   = $mean;
                     $context->trace->robustStdDevBeforeTruncation = $stdDev;
 
+
+                    // Garder la population complète pour que EvaluateLaboratories
+                    // puisse calculer le z-score du labo exclu (informatif)
+                    $context->originalPopulation = $context->population;
+
                     // Identifier les laboratoires dont z > 5 et les exclure
                     $measurements    = $context->population->measurements();
                     $truncatedCodes  = [];

@@ -15,7 +15,12 @@ final class LabEvaluation
         public readonly ?float $biasPercent,
         public readonly FitnessStatus $fitnessStatus,
         public readonly string $decisionBasis,
-        public readonly ?EvaluationValidity $evaluationValidity = null
+        public readonly ?EvaluationValidity $evaluationValidity = null,
+        // Labo exclu du calcul de la population (z > 5 troncature)
+        // Les scores sont calculés à titre informatif uniquement.
+        public readonly bool $isExcluded = false,
+        // Raison de l'exclusion : 'outlier_grubbs' | 'truncation_z5' | null
+        public readonly ?string $exclusionReason = null
     ) {}
 
     public function withEvaluationValidity(
