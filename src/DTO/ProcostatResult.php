@@ -40,8 +40,16 @@ final class ProcostatResult
         /**
          * Null si n < 7 (not_exploitable ou descriptive_only).
          * Contient x* et s* si full_evaluation.
+         * Si troncature (z>5), il s'agit des stats SUR LA POPULATION TRONQUÉE.
          */
         public readonly ?RobustStatistics $robustStatistics,
+
+        /**
+         * Stats robustes calculées sur la population COMPLÈTE avant troncature.
+         * Null si aucune troncature n'a eu lieu (robustStatistics = version initiale).
+         * Présent uniquement si truncationTriggered = true dans la trace.
+         */
+        public readonly ?RobustStatistics $robustStatisticsBeforeTruncation,
 
         public readonly PopulationSummary $populationSummary,
 

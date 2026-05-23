@@ -81,6 +81,10 @@ final class ComputeRobustStatistics implements PipelineStep
                     $context->trace->truncationTriggered = true;
                     $context->trace->addStep('truncation');
 
+                    // Conserver les stats initiales (population complète) pour la traçabilité
+                    $context->trace->robustMeanBeforeTruncation   = $mean;
+                    $context->trace->robustStdDevBeforeTruncation = $stdDev;
+
                     // Identifier les laboratoires dont z > 5 et les exclure
                     $measurements    = $context->population->measurements();
                     $truncatedCodes  = [];

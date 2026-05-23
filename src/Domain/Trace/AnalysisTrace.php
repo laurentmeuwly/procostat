@@ -32,6 +32,11 @@ final class AnalysisTrace
      *   - 'not_exploitable'   : n < 3
      *   - 'descriptive_only'  : 3 ≤ n ≤ 6
      *   - 'full_evaluation'   : n ≥ 7
+     *
+     * * Statut de la population selon Procorad :
+     *   - 'not_exploitable'   : n < 3
+     *   - 'descriptive_only'  : 3 ≤ n ≤ 12
+     *   - 'full_evaluation'   : n ≥ 12
      */
     public string $populationStatus = '';
 
@@ -114,6 +119,15 @@ final class AnalysisTrace
      * Statistiques robustes calculées sur la population.
      */
     public bool $robustStatisticsComputed = false;
+
+    /**
+     * Statistiques robustes calculées sur la population COMPLÈTE (avant troncature).
+     * Présentes uniquement si truncationTriggered = true.
+     * Null si aucune troncature n'a eu lieu (robustStatistics final = initial).
+     */
+    public ?float $robustMeanBeforeTruncation = null;
+    public ?float $robustStdDevBeforeTruncation = null;
+
 
     /**
      * z-score maximum dans la population (avant décision de troncature).

@@ -112,10 +112,22 @@ final class RunAnalysis implements AnalysisEngine
             );
         }
 
+        // Stats robustes avant troncature — reconstituées depuis la trace si troncature a eu lieu
+        $robustBeforeTruncation = null;
+        if ($finalContext->trace->truncationTriggered
+            && $finalContext->trace->robustMeanBeforeTruncation !== null
+        ) {
+            $robustBeforeTruncation = new \Procorad\Procostat\Domain\Statistics\RobustStatistics(
+                mean:   $finalContext->trace->robustMeanBeforeTruncation,
+                stdDev: $finalContext->trace->robustStdDevBeforeTruncation ?? 0.0,
+            );
+        }
+
         $result = new ProcostatResult(
             assignedValue: $finalContext->assignedValue,
             descriptiveStatistics: $finalContext->descriptiveStatistics,
-            robustStatistics: $finalContext->robustStatistics,      // nullable
+            robustStatistics: $finalContext->robustStatistics,      // tronquée si z>5
+            robustStatisticsBeforeTruncation: $robustBeforeTruncation,  // complète (null si pas de troncature)
             populationSummary: $finalContext->populationSummary,
             primaryIndicator: $finalContext->primaryIndicator,      // nullable
             labEvaluations: $finalContext->labEvaluations,
