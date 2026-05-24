@@ -37,6 +37,12 @@ final class RecordAuditTrail implements PipelineStep
         );
 
         foreach ($context->labEvaluations as $evaluation) {
+            // Les labos exclus (Grubbs, troncature z>5) n'ont pas de score
+            // de décision — ils apparaissent dans l'UI mais pas dans l'audit.
+            if ($evaluation->isExcluded) {
+                continue;
+            }
+
             $decisionScore = $this->decisionScoreFromEvaluation($evaluation);
 
             $event = AuditBuilder::labDecision(

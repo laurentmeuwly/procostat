@@ -14,7 +14,7 @@ final class LabEvaluation
         public readonly ?float $zetaScore,
         public readonly ?float $biasPercent,
         public readonly FitnessStatus $fitnessStatus,
-        public readonly string $decisionBasis,
+        public readonly ?string $decisionBasis,  // null pour les labos exclus (Grubbs, z>5)
         public readonly ?EvaluationValidity $evaluationValidity = null,
         // Labo exclu du calcul de la population (z > 5 troncature)
         // Les scores sont calculés à titre informatif uniquement.

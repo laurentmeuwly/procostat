@@ -85,8 +85,8 @@ final class RunAnalysis implements AnalysisEngine
             new EvaluatePopulationSize($this->populationThresholds),
             new CheckNormality($this->normalityAdapter),
             new DetectOutliers,
-            new BuildDescriptiveStatistics,
-            new ComputeRobustStatistics,
+            new ComputeRobustStatistics,        // peut modifier population + populationStatus
+            new BuildDescriptiveStatistics,     // apres : reflète la population finale
             new ResolveAssignedValue($this->assignedValueResolver),
             new ValidateCertifiedValue,
             new DecidePrimaryIndicator,

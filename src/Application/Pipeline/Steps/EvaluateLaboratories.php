@@ -84,7 +84,7 @@ final class EvaluateLaboratories implements PipelineStep
                     zetaScore:       null,
                     biasPercent:     null,
                     fitnessStatus:   \Procorad\Procostat\Domain\Decision\FitnessStatus::NON_EVALUABLE,
-                    decisionBasis:   'grubbs',
+                    decisionBasis:   null,
                     isExcluded:      true,
                     exclusionReason: 'grubbs',
                 );
@@ -112,7 +112,7 @@ final class EvaluateLaboratories implements PipelineStep
                     zetaScore:       null,
                     biasPercent:     null,
                     fitnessStatus:   \Procorad\Procostat\Domain\Decision\FitnessStatus::NON_EVALUABLE,
-                    decisionBasis:   'z',
+                    decisionBasis:   null,
                     isExcluded:      true,
                     exclusionReason: 'truncation_z5',
                 );
