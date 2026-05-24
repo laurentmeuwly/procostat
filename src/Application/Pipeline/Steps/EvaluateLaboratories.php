@@ -49,23 +49,51 @@ final class EvaluateLaboratories implements PipelineStep
 
         $thresholds = $this->thresholdsResolver->resolve($context->thresholdStandard);
 
-        // Codes des labos exclus par troncature (z > 5)
+        // Codes des labos exclus par troncature z>5
         $truncatedCodes = array_flip($context->trace->truncatedLabs ?? []);
 
-        // Itérer sur la population ORIGINALE si elle existe (troncature appliquée),
-        // sinon sur la population courante — pour que les labos exclus soient
-        // présents dans labEvaluations avec leur score et is_excluded = true.
+        // Code du labo exclu par Grubbs initial (avant troncature)
+        $grubbsExcludedCode = $context->trace->grubbsExcludedLab !== null
+            ? (string) $context->trace->grubbsExcludedLab
+            : null;
+
+        // Code du labo exclu par Grubbs apres troncature (retour de branche)
+        $grubbsPostTruncExcludedCode = $context->trace->grubbsExcludedLabPostTruncation !== null
+            ? (string) $context->trace->grubbsExcludedLabPostTruncation
+            : null;
+
+        // Iterer sur TOUS les labos du dataset original (avant toute exclusion)
+        // pour que chaque labo apparaisse dans labEvaluations, qu'il soit
+        // evalué, exclu par Grubbs, ou exclu par troncature z>5.
+        // On remonte au niveau le plus haut : originalPopulation si elle existe
+        // (Grubbs ou troncature ont eu lieu), sinon population courante.
         $allMeasurements = ($context->originalPopulation ?? $context->population)->measurements();
 
         foreach ($allMeasurements as $measurement) {
             $labCode = (string) $measurement->laboratoryCode();
-            $isExcluded = isset($truncatedCodes[$labCode]);
 
-            if ($isExcluded) {
-                // Labo exclu par troncature (z > 5) :
-                // on stocke uniquement le z-score brut qui a justifié l'exclusion,
-                // calculé sur la population COMPLÈTE (x*/s* avant troncature).
-                // Aucun z', zeta, biais, ni fitness — il n'est pas évalué.
+            // ── Labo exclu par Grubbs (initial ou post-troncature) ────────────
+            $isGrubbsExcluded = ($grubbsExcludedCode !== null && $labCode === $grubbsExcludedCode)
+                             || ($grubbsPostTruncExcludedCode !== null && $labCode === $grubbsPostTruncExcludedCode);
+
+            if ($isGrubbsExcluded) {
+                $context->labEvaluations[$labCode] = new LabEvaluation(
+                    laboratoryCode:  $labCode,
+                    zScore:          null,
+                    zPrimeScore:     null,
+                    zetaScore:       null,
+                    biasPercent:     null,
+                    fitnessStatus:   \Procorad\Procostat\Domain\Decision\FitnessStatus::NON_EVALUABLE,
+                    decisionBasis:   'grubbs',
+                    isExcluded:      true,
+                    exclusionReason: 'grubbs',
+                );
+                continue;
+            }
+
+            // ── Labo exclu par troncature z>5 ────────────────────────────────
+            // On conserve le z brut qui a justifie l'exclusion (informatif).
+            if (isset($truncatedCodes[$labCode])) {
                 $zBeforeTruncation = null;
 
                 if ($context->trace->robustMeanBeforeTruncation !== null
@@ -79,7 +107,7 @@ final class EvaluateLaboratories implements PipelineStep
 
                 $context->labEvaluations[$labCode] = new LabEvaluation(
                     laboratoryCode:  $labCode,
-                    zScore:          $zBeforeTruncation,   // z qui a déclenché l'exclusion
+                    zScore:          $zBeforeTruncation,
                     zPrimeScore:     null,
                     zetaScore:       null,
                     biasPercent:     null,
@@ -88,16 +116,14 @@ final class EvaluateLaboratories implements PipelineStep
                     isExcluded:      true,
                     exclusionReason: 'truncation_z5',
                 );
-
                 continue;
             }
 
-
+            // ── Labo normal : evaluation complete ────────────────────────────
             $context->labEvaluations[$labCode] = $this->evaluateLab(
                 $measurement,
                 $context->evaluationReference,
                 $thresholds,
-                $isExcluded,
             );
         }
 
@@ -110,7 +136,6 @@ final class EvaluateLaboratories implements PipelineStep
         Measurement $measurement,
         EvaluationReference $ref,
         Thresholds $thresholds,
-        bool $isExcluded = false,
     ): LabEvaluation {
         $xLab = $measurement->value();
         $uLab = $measurement->uncertainty()?->toStandard(); // k=1
@@ -196,8 +221,8 @@ final class EvaluateLaboratories implements PipelineStep
             biasPercent:    $biasPercent,
             fitnessStatus:  $fitnessStatus,
             decisionBasis:  $decisionBasis,
-            isExcluded:      $isExcluded,
-            exclusionReason: $isExcluded ? 'truncation_z5' : null
+            isExcluded:      false,
+            exclusionReason: null
         );
     }
 }

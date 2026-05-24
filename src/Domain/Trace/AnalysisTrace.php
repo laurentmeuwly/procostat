@@ -36,7 +36,7 @@ final class AnalysisTrace
      * * Statut de la population selon Procorad :
      *   - 'not_exploitable'   : n < 3
      *   - 'descriptive_only'  : 3 ≤ n ≤ 12
-     *   - 'full_evaluation'   : n ≥ 12
+     *   - 'full_evaluation'   : n > 12
      */
     public string $populationStatus = '';
 
@@ -53,7 +53,7 @@ final class AnalysisTrace
     // ── Normalité ───────────────────────────────────────────────────────────
 
     /**
-     * Test de normalité applicable (n ≥ 7).
+     * Test de normalité applicable
      */
     public bool $normalityTestApplicable = false;
 
@@ -102,6 +102,12 @@ final class AnalysisTrace
      * Alimenté par DetectOutliers après exclusion de la population.
      */
     public ?string $grubbsExcludedLab = null;
+
+    /**
+     * Code du labo exclu par Grubbs apres une troncature z>5
+     * (second passage Grubbs suite au retour de branche §11).
+     */
+    public ?string $grubbsExcludedLabPostTruncation = null;
 
     /**
      * Test de Dixon déclenché.
