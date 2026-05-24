@@ -42,7 +42,7 @@ final class RunAnalysis implements AnalysisEngine
     ) {
         // PROCORAD utilise minFullEvaluation = 12 (plan statistique §3 et logigramme §11)
         // ISO 13528 strict utiliserait 7 — configurable via withPopulationThresholds().
-        $this->populationThresholds = PopulationThresholds::procorad()
+        $this->populationThresholds = PopulationThresholds::procorad();
     }
 
     /**
