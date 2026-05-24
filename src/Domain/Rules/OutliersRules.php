@@ -18,7 +18,7 @@ final class OutliersRules
         // Seuils critiques ISO 13528 / ASTM E178 (α = 5%, unilatéral)
         // Source : table G_crit pour le test de Grubbs (valeur unique aberrante)
         $criticalValues = [
-            3  => 1.148, 4  => 1.481, 5  => 1.715, 6  => 1.887,
+            3  => 1.155, 4  => 1.481, 5  => 1.715, 6  => 1.887,
             7  => 2.020, 8  => 2.126, 9  => 2.215, 10 => 2.290,
             11 => 2.355, 12 => 2.412, 13 => 2.462, 14 => 2.507,
             15 => 2.549, 16 => 2.585, 17 => 2.620, 18 => 2.651,
