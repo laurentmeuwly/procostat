@@ -56,7 +56,13 @@ final class AnalysisContext
         /** @var LabEvaluation[] */
         public array $labEvaluations = [],
 
-        public ?AuditTrail $auditTrail = null
+        public ?AuditTrail $auditTrail = null,
+
+        /**
+         * Decision de l'expert (passe 2 uniquement).
+         * Null en passe 1 — calcul initial sans intervention.
+         */
+        public ?ExpertDecision $expertDecision = null,
     ) {}
 
 }

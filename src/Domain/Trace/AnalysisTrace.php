@@ -180,6 +180,18 @@ final class AnalysisTrace
      */
     public bool $expertValidationRequired = false;
 
+    /**
+     * Vrai si l'expert a choisi de conserver la valeur certifiee
+     * malgre l'echec du critere paragraphe 9.2.2 (passe 2).
+     */
+    public bool $expertOverride = false;
+
+    /**
+     * Justification saisie par l'expert (passe 2, keepCertifiedValue = true).
+     * Null si pas d'intervention ou si l'expert a accepte le robuste.
+     */
+    public ?string $expertJustification = null;
+
     // ── Indicateur de performance ────────────────────────────────────────────
 
     /**

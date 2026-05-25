@@ -71,7 +71,11 @@ final class ResolveAssignedValue implements PipelineStep
             $context->robustStatistics,
             $context->population->count()
         );
-
+logger()->debug('ResolveAssignedValue result', [
+    'type'  => $context->assignedValue?->type()->value,
+    'value' => $context->assignedValue?->value(),
+    'uK2'   => $context->assignedValue?->expandedUncertaintyK2(),
+]);
         return $context;
     }
 }

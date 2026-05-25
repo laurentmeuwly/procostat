@@ -15,39 +15,36 @@ use RuntimeException;
  *
  * Critere (NF ISO 13528, paragraphe 7.8.1) :
  *
- *   |Xref - X*| <= 2 * sqrt( u2(ref) + (1.25 * s* / sqrt(p))^2 )
+ *   |Xref - X*| <= 2 * sqrt( u2(ref) + (1.25 * s_star / sqrt(p))^2 )
  *
- * Si l'inegalite est respectee  ->  valeur certifiee validee.
- * Si l'inegalite n'est PAS respectee :
- *   - par defaut : la moyenne robuste est substituee comme valeur assignee,
- *   - l'expert peut maintenir la valeur certifiee apres investigation ;
- *     dans ce cas le flag expertValidationRequired reste true dans la trace
- *     et dans ProcostatResult afin que l'UI affiche [Validation par l'expert].
+ * ── Passe 1 (expertDecision = null) ─────────────────────────────────────────
+ *   Critere OK  : valeur certifiee retenue, pipeline continue normalement.
+ *   Critere KO  : substitution automatique par X*, expertValidationRequired = true.
+ *                 L'UI affiche le bouton [Validation par l'expert].
+ *
+ * ── Passe 2 (expertDecision fourni) ─────────────────────────────────────────
+ *   keepCertifiedValue = true  : l'expert maintient Xref malgre l'inegalite.
+ *                                expertOverride = true, justification tracee.
+ *                                assignedValue reste CERTIFIED.
+ *   keepCertifiedValue = false : l'expert accepte la substitution par X*.
+ *                                Meme comportement que la substitution automatique.
  *
  * Ce step ne s'execute que si :
- *   - populationStatus === FULL_EVALUATION  (stats robustes disponibles)
+ *   - populationStatus === FULL_EVALUATION
  *   - assignedValue est de type CERTIFIED
- *
- * Positionnement dans le pipeline :
- *   ResolveAssignedValue -> ValidateCertifiedValue -> DecidePrimaryIndicator -> ...
  */
 final class ValidateCertifiedValue implements PipelineStep
 {
     public function __invoke(AnalysisContext $context): AnalysisContext
     {
         if ($context->populationStatus === null) {
-            throw new RuntimeException(
-                'ValidateCertifiedValue requires PopulationStatus.'
-            );
+            throw new RuntimeException('ValidateCertifiedValue requires PopulationStatus.');
         }
 
         if ($context->assignedValue === null) {
-            throw new RuntimeException(
-                'ValidateCertifiedValue requires AssignedValue.'
-            );
+            throw new RuntimeException('ValidateCertifiedValue requires AssignedValue.');
         }
 
-        // Ce step ne s'applique qu'en full_evaluation avec une valeur certifiee
         if ($context->populationStatus !== PopulationStatus::FULL_EVALUATION) {
             return $context;
         }
@@ -66,7 +63,7 @@ final class ValidateCertifiedValue implements PipelineStep
             ?? throw new RuntimeException('ValidateCertifiedValue requires Population.');
 
         $xRef  = $context->assignedValue->value();
-        $uRef  = $context->assignedValue->standardUncertainty()  // k=1
+        $uRef  = $context->assignedValue->standardUncertainty()
             ?? throw new RuntimeException(
                 'ValidateCertifiedValue requires a standard uncertainty on the certified value.'
             );
@@ -74,10 +71,7 @@ final class ValidateCertifiedValue implements PipelineStep
         $sStar = $context->robustStatistics->stdDev();
 
         // -- Critere paragraphe 9.2.2 ----------------------------------------
-        //
-        //   |Xref - X*| <= 2 * sqrt( u2(ref) + (1.25 * s*/sqrt(p))^2 )
-        //
-        $uConsensus = 1.25 * $sStar / sqrt($p);  // u(X*) k=1 = 1.25 s*/sqrt(p)
+        $uConsensus = 1.25 * $sStar / sqrt($p);
         $threshold  = 2.0 * sqrt($uRef ** 2 + $uConsensus ** 2);
         $gap        = abs($xRef - $xStar);
         $validated  = $gap <= $threshold;
@@ -103,18 +97,42 @@ final class ValidateCertifiedValue implements PipelineStep
             $validated ? 'certified_value_validated' : 'certified_value_rejected'
         );
 
-        // -- Substitution automatique si non validee --------------------------
-        // Selon paragraphe 9.2.2 : "l'expert choisit comme valeur assignee
-        // la moyenne robuste" (comportement par defaut).
-        // expertValidationRequired reste true pour alerter l'UI.
-        if (! $validated) {
-            $context->assignedValue = AssignedValue::robust(
-                value:                 $xStar,
-                expandedUncertaintyK2: 2.0 * $uConsensus,  // U(X*) k=2
-            );
-
-            $context->trace->addStep('certified_value_fallback_to_robust');
+        // -- Substitution ou conservation ------------------------------------
+        //
+        // Critere OK : rien a faire, assignedValue reste CERTIFIED.
+        if ($validated) {
+            return $context;
         }
+
+        // Critere KO — trois cas selon la presence et le contenu de expertDecision :
+        //
+        //   cas A (passe 2, expert conserve Xref) :
+        //     -> on ne substitue PAS, on trace l'override et on sort.
+        //
+        //   cas B (passe 2, expert accepte le robuste) :
+        //   cas C (passe 1, substitution automatique) :
+        //     -> on substitue par X* (meme comportement dans les deux cas).
+
+        if ($context->expertDecision !== null && $context->expertDecision->keepCertifiedValue) {
+            // Cas A : expert maintient la valeur certifiee malgre l'inegalite
+            $context->trace->expertOverride      = true;
+            $context->trace->expertJustification = $context->expertDecision->justification;
+            $context->trace->addStep('certified_value_expert_override');
+            // assignedValue reste CERTIFIED — pas de substitution
+            return $context;
+        }
+
+        // Cas B ou C : substitution par la moyenne robuste
+        if ($context->expertDecision !== null) {
+            // Cas B : expert a explicitement accepte le robuste
+            $context->trace->addStep('certified_value_expert_accepted_robust');
+        }
+
+        $context->assignedValue = AssignedValue::robust(
+            value:                 $xStar,
+            expandedUncertaintyK2: 2.0 * $uConsensus,
+        );
+        $context->trace->addStep('certified_value_fallback_to_robust');
 
         return $context;
     }

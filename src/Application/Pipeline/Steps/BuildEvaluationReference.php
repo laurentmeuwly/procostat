@@ -4,6 +4,7 @@ namespace Procorad\Procostat\Application\Pipeline\Steps;
 
 use Procorad\Procostat\Application\AnalysisContext;
 use Procorad\Procostat\Application\Pipeline\PipelineStep;
+use Procorad\Procostat\Domain\AssignedValue\AssignedValueType;
 use Procorad\Procostat\Domain\Performance\EvaluationReference;
 use Procorad\Procostat\Domain\Performance\IndicatorType;
 use Procorad\Procostat\Domain\Performance\ReferenceSource;
@@ -65,6 +66,13 @@ final class BuildEvaluationReference implements PipelineStep
         $context->evaluationReference = $this->buildFullEvaluationReference($context);
         $this->traceReference($context);
 
+        logger()->debug('BuildEvaluationReference result', [
+    'centralValue'   => $context->evaluationReference?->centralValue,
+    'sigma'          => $context->evaluationReference?->sigma,
+    'uRef'           => $context->evaluationReference?->uRef,
+    'decisionBasis'  => $context->evaluationReference?->decisionBasis?->value,
+    'referenceSource'=> $context->evaluationReference?->referenceSource?->value,
+]);
         return $context;
     }
 
@@ -112,26 +120,38 @@ final class BuildEvaluationReference implements PipelineStep
 
         $assignedValue = $context->assignedValue;
 
-        // Branche certifiée : primaryIndicator = Z → référence = valeur certifiée
-        if ($context->primaryIndicator === IndicatorType::Z) {
+        // La centralValue est déterminée par la SOURCE de la valeur assignée,
+        // pas par l'indicateur primaire (qui peut être forcé à Z' par config).
+        //
+        // CERTIFIED  → centralValue = valeur certifiée (x_ref)
+        //              uRef = U_ref / 2  (incertitude standard de la référence)
+        //
+        // ROBUST_MEAN → centralValue = moyenne robuste (x*)
+        //               uRef = 1.25 × s* / √n  (ISO 13528 §C.4)
+        //
+        // Dans les deux cas, decisionBasis = Z_PRIME car le score de performance
+        // intègre l'incertitude du labo (u_lab) dans le dénominateur.
+
+        if ($assignedValue->type() === AssignedValueType::CERTIFIED) {
             return new EvaluationReference(
                 centralValue:    $assignedValue->value(),
-                sigma:           $robustStats->stdDev(),
-                uRef:            $assignedValue->standardUncertainty(),
+                sigma:           $robustStats->stdDev(),   // s* pour le Z classique si besoin
+                uRef:            $assignedValue->standardUncertainty(),  // U_ref/2
                 decisionBasis:   IndicatorType::Z_PRIME,
                 referenceSource: ReferenceSource::CertifiedValue,
             );
         }
 
-        // Branche robuste : primaryIndicator = Z_PRIME → référence = moyenne robuste
+        // ROBUST_MEAN
         return new EvaluationReference(
             centralValue:    $robustStats->mean(),
             sigma:           $robustStats->stdDev(),
-            uRef:            $assignedValue->standardUncertainty(),
+            uRef:            $assignedValue->standardUncertainty(),  // 1.25×s*/√n
             decisionBasis:   IndicatorType::Z_PRIME,
             referenceSource: ReferenceSource::RobustMean,
         );
     }
+
 
     // ── Trace ────────────────────────────────────────────────────────────────
 

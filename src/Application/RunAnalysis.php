@@ -72,11 +72,15 @@ final class RunAnalysis implements AnalysisEngine
         return $clone;
     }
 
-    private function run(AnalysisDataset $dataset): AnalysisOutput
+    private function run(
+        AnalysisDataset $dataset,
+        ?ExpertDecision $expertDecision = null,
+    ): AnalysisOutput
     {
         $context = new AnalysisContext(
             dataset: $dataset,
-            thresholdStandard: $this->thresholdStandard
+            thresholdStandard: $this->thresholdStandard,
+            expertDecision:    $expertDecision,
         );
 
         $runner = new PipelineRunner([
@@ -140,6 +144,8 @@ final class RunAnalysis implements AnalysisEngine
             expertValidationRequired:          $finalContext->trace->expertValidationRequired,
             certifiedValueValidationGap:       $finalContext->trace->certifiedValueValidationGap,
             certifiedValueValidationThreshold: $finalContext->trace->certifiedValueValidationThreshold,
+            expertOverride:                    $finalContext->trace->expertOverride,
+            expertJustification:               $finalContext->trace->expertJustification,
         );
 
         return new AnalysisOutput(

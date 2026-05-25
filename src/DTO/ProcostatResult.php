@@ -83,6 +83,17 @@ final class ProcostatResult
          * Seuil 2 * sqrt[ u2(ref) + (1.25 * s_star / sqrt(p))^2 ] (null si non applicable).
          */
         public readonly ?float $certifiedValueValidationThreshold = null,
+
+        /**
+         * Vrai si l'expert a choisi de maintenir la valeur certifiee
+         * malgre l'echec du critere paragraphe 9.2.2 (passe 2).
+         */
+        public readonly bool $expertOverride = false,
+
+        /**
+         * Justification saisie par l'expert (null si pas d'override).
+         */
+        public readonly ?string $expertJustification = null,
     ) {}
 
     /** @return array<string, LabEvaluation> */
