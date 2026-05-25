@@ -27,6 +27,7 @@ use Procorad\Procostat\Domain\Trace\AnalysisTrace;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\AnalysisOutput;
 use Procorad\Procostat\DTO\ProcostatResult;
+use Procorad\Procostat\DTO\ExpertDecision;
 use Procorad\Procostat\Support\Version;
 
 final class RunAnalysis implements AnalysisEngine

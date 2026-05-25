@@ -14,6 +14,7 @@ use Procorad\Procostat\Domain\Statistics\RobustStatistics;
 use Procorad\Procostat\Domain\Trace\AnalysisTrace;
 use Procorad\Procostat\DTO\AnalysisDataset;
 use Procorad\Procostat\DTO\PopulationSummary;
+use Procorad\Procostat\DTO\ExpertDecision;
 
 /**
  * Immutable-at-entry analysis context, progressively enriched
