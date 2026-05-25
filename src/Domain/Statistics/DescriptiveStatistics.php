@@ -20,5 +20,8 @@ final class DescriptiveStatistics
 
         /** Optional trimmed count */
         public readonly ?int $trimmedCount = null,
+
+        // U(x̄, k=2) = 2 × s / √p — calculé à la construction
+        public readonly ?float  $uArithK2 = null,
     ) {}
 }

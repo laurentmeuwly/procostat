@@ -30,6 +30,11 @@ final class DescriptiveStatisticsCalculator
             ? $trimmedPopulation->count()
             : null;
 
+        $s = self::stdDev($values);
+        $uArithK2 = ($s !== null && $n > 1)
+            ? 2.0 * $s / sqrt($n)
+            : null;
+
         return new DescriptiveStatistics(
             count: $n,
             minimum: $values[0],
@@ -39,6 +44,7 @@ final class DescriptiveStatisticsCalculator
             standardDeviation: self::stdDev($values),
             medianAbsoluteDeviation: self::mad($values),
             trimmedCount: $trimmedCount,
+            uArithK2: $uArithK2,
         );
     }
 
