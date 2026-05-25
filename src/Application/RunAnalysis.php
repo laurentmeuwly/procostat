@@ -49,9 +49,9 @@ final class RunAnalysis implements AnalysisEngine
     /**
      * API publique principale
      */
-    public function analyze(AnalysisDataset $dataset): ProcostatResult
+    public function analyze(AnalysisDataset $dataset, ?ExpertDecision $expertDecision = null): ProcostatResult
     {
-        return $this->run($dataset)->result;
+        return $this->run($dataset, $expertDecision)->result;
     }
 
     /**
@@ -61,9 +61,9 @@ final class RunAnalysis implements AnalysisEngine
      *   $output = $engine->analyzeWithTrace($dataset);
      *   expect($output->trace->workflowPath)->toEqual([...]);
      */
-    public function analyzeWithTrace(AnalysisDataset $dataset): AnalysisOutput
+    public function analyzeWithTrace(AnalysisDataset $dataset, ?ExpertDecision $expertDecision = null): AnalysisOutput
     {
-        return $this->run($dataset);
+        return $this->run($dataset, $expertDecision);
     }
 
     public function withPopulationThresholds(PopulationThresholds $thresholds): static
