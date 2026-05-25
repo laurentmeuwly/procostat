@@ -187,6 +187,13 @@ final class AnalysisTrace
     public bool $expertOverride = false;
 
     /**
+     * Vrai si l'expert a explicitement choisi la moyenne robuste en passe 2
+     * (keepCertifiedValue = false). Distingue ce cas de la substitution
+     * automatique de la passe 1 ou expertOverride est aussi false.
+     */
+    public bool $expertConfirmedRobust = false;
+
+    /**
      * Justification saisie par l'expert (passe 2, keepCertifiedValue = true).
      * Null si pas d'intervention ou si l'expert a accepte le robuste.
      */

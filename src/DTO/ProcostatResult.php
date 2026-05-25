@@ -91,6 +91,11 @@ final class ProcostatResult
         public readonly bool $expertOverride = false,
 
         /**
+         * Vrai si l'expert a explicitement confirmé la moyenne robuste en passe 2.
+         */
+        public readonly bool $expertConfirmedRobust = false,
+
+        /**
          * Justification saisie par l'expert (null si pas d'override).
          */
         public readonly ?string $expertJustification = null,

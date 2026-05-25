@@ -147,6 +147,7 @@ final class RunAnalysis implements AnalysisEngine
             certifiedValueValidationThreshold: $finalContext->trace->certifiedValueValidationThreshold,
             expertOverride:                    $finalContext->trace->expertOverride,
             expertJustification:               $finalContext->trace->expertJustification,
+            expertConfirmedRobust:             $finalContext->trace->expertConfirmedRobust,
         );
 
         return new AnalysisOutput(

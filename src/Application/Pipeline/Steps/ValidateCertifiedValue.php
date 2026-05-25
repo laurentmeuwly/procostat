@@ -123,8 +123,9 @@ final class ValidateCertifiedValue implements PipelineStep
         }
 
         // Cas B ou C : substitution par la moyenne robuste
+        // Cas B : expert a explicitement accepte le robuste
         if ($context->expertDecision !== null) {
-            // Cas B : expert a explicitement accepte le robuste
+            $context->trace->expertConfirmedRobust = true;
             $context->trace->addStep('certified_value_expert_accepted_robust');
         }
 
