@@ -91,11 +91,27 @@ final class BuildEvaluationReference implements PipelineStep
             );
         }
 
+        // Si valeur certifiée disponible → l'utiliser comme centralValue
+        // même en descriptive_only (n ≤ 12)
+        if ($context->assignedValue?->type() === AssignedValueType::CERTIFIED
+            && $context->assignedValue->value() !== null) {
+            return new EvaluationReference(
+                centralValue:    $context->assignedValue->value(),
+                sigma:           null,
+                uRef:            $context->assignedValue->standardUncertainty(),
+                decisionBasis:   IndicatorType::ZETA,
+                referenceSource: ReferenceSource::CertifiedValue,
+            );
+        }
+
         // Pour descriptive_only : pas de sigma d'aptitude (pas de z ni z'),
         // uniquement le zeta basé sur les incertitudes individuelles.
         //
         // uRef = u(arith) = U(arith) / 2  où  U(arith) = 2 × s / √p
         // Simplifié : uRef = s / √p  (k=1)
+        $mean = $context->descriptiveStatistics->mean
+            ?? throw new RuntimeException('...');
+
         $n    = $context->population?->count() ?? 1;
         $s    = $descriptive->standardDeviation;
         $uRef = ($s !== null && $n > 1)
@@ -103,7 +119,7 @@ final class BuildEvaluationReference implements PipelineStep
             : null;
 
         return new EvaluationReference(
-            centralValue:    $descriptive->mean,
+            centralValue:    $mean,
             sigma:           null,
             uRef:            $uRef,
             decisionBasis:   IndicatorType::ZETA,
